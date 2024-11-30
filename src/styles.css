@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'LXGWNeoXiHei';
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  src: url('/assets/font.woff2') format('woff2');
+}
+
+html {
+  font-family: 'LXGWNeoXiHei', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
