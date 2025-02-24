@@ -1,0 +1,7 @@
+.navButton {
+  transition: backdrop-filter 300ms ease-in-out;
+}
+
+.navButton:hover, .navButton:active, .navButtonActive {
+  backdrop-filter: blur(16px) brightness(0.9) saturate(0.9);
+}

@@ -1,0 +1,68 @@
+
+
+# 构建
+
+误以为 `$LD` 是由 Nix 指定，这是我在整个过程中犯的最大错误。其实我早该意识到
+
+# 部署
+
+上述编译过程完成后，我们得到的文件是一个 `result` 文件夹，里面包含了我们编译好的 NixOS 系统。
+
+```
+$ ls result
+activate               boot.json     extra-dependencies  init-interface-version  kernel-modules  specialisation  systemd
+append-initrd-secrets  dry-activate  firmware            initrd                  kernel-params   sw
+bin                    etc           init                kernel                  nixos-version   system
+```
+
+奇怪的是，这个文件夹的内容看上去并不像是我们通常见到的 Linux 系统的根目录，例如 NixOS 下的：
+
+```
+$ ls /
+bin  boot  dev  etc  home  lib  lib64  lost+found  nix  proc  root  run  srv  sys  tmp  usr  var
+```
+
+这个文件夹到底是什么？我想到 `flake.nix` 中那个特殊的 `self.nixosConfigurations.raven.config.system.build.toplevel` 属性，搜索 `toplevel` 关键字发现：对于一个正在运行中的 NixOS 系统，它的 `/run/current-system` 目录指向的正是类似上述 `result` 文件夹的内容。
+
+```
+$ ls -al /run/current-system
+lrwxrwxrwx 1 root root 85 Feb 22 22:18 /run/current-system -> /nix/store/nv239s5rilyb4i2glsg1hbi4nbzdjang-nixos-system-theresa-25.05.19800101.dirty
+```
+
+看上去这就是 NixOS 对于「系统」的特殊表示方式。那么，现在的问题就变成了：如果 NixOS 认为这就是一个系统，那么它是如何把它「变成」上面的根目录的？
+我觉得要回答这个问题，可能需要先了解下 NixOS 的启动过程。
+
+Linus Heckemann 的 [How can I boot NixOS? Let me count the ways...](https://linus.schreibt.jetzt/posts/booting-nixos.html) 这篇文章详细介绍了 NixOS 的启动过程。
+
+- 上述的 `toplevel` 其实也叫 system package，the entire system configuration is built into a single package which depends on everything the system needs
+
+
+运行构建，得到下面的报错。
+
+```
+$ nix build .#image
+… while evaluating a branch condition
+         at /nix/store/kdynjy1mbgkdg4p196v9gx6ljpf7q4nk-source/pkgs/stdenv/generic/make-derivation.nix:66:7:
+           65|     fnOrAttrs:
+           66|       if builtins.isFunction fnOrAttrs
+             |       ^
+           67|       then makeDerivationExtensible fnOrAttrs
+
+       … while calling the 'isFunction' builtin
+         at /nix/store/kdynjy1mbgkdg4p196v9gx6ljpf7q4nk-source/pkgs/stdenv/generic/make-derivation.nix:66:10:
+           65|     fnOrAttrs:
+           66|       if builtins.isFunction fnOrAttrs
+             |          ^
+           67|       then makeDerivationExtensible fnOrAttrs
+
+       … while calling the 'throw' builtin
+         at /nix/store/kdynjy1mbgkdg4p196v9gx6ljpf7q4nk-source/pkgs/by-name/ed/edk2/package.nix:31:7:
+           30|     else
+           31|       throw "Unsupported architecture";
+             |       ^
+           32|
+
+       error: Unsupported architecture
+```
+
+仔细查看堆栈，发现是我们 `format.nix` 中引用的 `make-disk-image.nix` 出现了报错。

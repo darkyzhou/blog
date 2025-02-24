@@ -1,0 +1,24 @@
+import type { PropsWithChildren } from 'react'
+
+export type PageContainerProps = PropsWithChildren<{
+  caption: string
+}>
+
+export function PageContainer({ children, caption }: PageContainerProps) {
+  return (
+    <div
+      className="relative row-span-full col-start-3 col-end-12 grid grid-cols-subgrid min-h-0 overflow-x-visible overflow-y-auto pointer-events-none -mr-12 lg:-mr-16"
+    >
+      <div className="row-start-1 col-span-8 h-[25dvh]" />
+      <div className="z-10 row-start-2 col-span-8 h-[13dvh] bg-carbongray-800 sticky -top-[0.5dvh] -mr-12 lg:-mr-16" />
+      <div className="z-10 row-start-3 col-span-8 h-[12.5dvh] bg-carbongray-800 pointer-events-auto sticky top-[12.5dvh] -mt-[12.5dvh] -mr-12 lg:-mr-16">
+        <div className="px-12 lg:px-16 pb-4 h-full flex justify-start items-end text-3xl text-carbongray-50">
+          {caption}
+        </div>
+      </div>
+      <div className="row-start-4 col-span-8 grid grid-cols-subgrid bg-carbongray-900 pointer-events-auto">
+        {children}
+      </div>
+    </div>
+  )
+}

@@ -1,15 +1,112 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-@font-face {
-  font-family: 'LXGWNeoXiHei';
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-  src: url('/assets/font.woff2') format('woff2');
+@plugin '@tailwindcss/typography';
+
+@theme {
+  --font-*: initial;
+  --font-sans:
+    'IBM Plex Sans SC', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono:
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  --color-*: initial;
+  --color-carboncool-50: #f2f4f8;
+  --color-carboncool-100: #dde1e6;
+  --color-carboncool-200: #c1c7cd;
+  --color-carboncool-300: #a2a9b0;
+  --color-carboncool-400: #878d96;
+  --color-carboncool-500: #697077;
+  --color-carboncool-600: #4d5358;
+  --color-carboncool-700: #343a3f;
+  --color-carboncool-800: #21272a;
+  --color-carboncool-900: #121619;
+
+  --color-carbongray-50: #f4f4f4;
+  --color-carbongray-100: #e0e0e0;
+  --color-carbongray-200: #c6c6c6;
+  --color-carbongray-300: #a8a8a8;
+  --color-carbongray-400: #8d8d8d;
+  --color-carbongray-500: #6f6f6f;
+  --color-carbongray-600: #525252;
+  --color-carbongray-700: #393939;
+  --color-carbongray-800: #262626;
+  --color-carbongray-900: #161616;
+
+  --color-carbonwarm-50: #f7f3f2;
+  --color-carbonwarm-100: #e5e0df;
+  --color-carbonwarm-200: #cac5c4;
+  --color-carbonwarm-300: #ada8a8;
+  --color-carbonwarm-400: #8f8b8b;
+  --color-carbonwarm-500: #726e6e;
+  --color-carbonwarm-600: #565151;
+  --color-carbonwarm-700: #3c3838;
+  --color-carbonwarm-800: #272525;
+  --color-carbonwarm-900: #171414;
+
+  --color-carbonblue-50: #edf5ff;
+  --color-carbonblue-100: #d0e2ff;
+  --color-carbonblue-200: #a6c8ff;
+  --color-carbonblue-300: #78a9ff;
+  --color-carbonblue-400: #4589ff;
+  --color-carbonblue-500: #0f62fe;
+  --color-carbonblue-600: #0043ce;
+  --color-carbonblue-700: #002d9c;
+  --color-carbonblue-800: #001d6c;
+  --color-carbonblue-900: #001141;
 }
 
-html {
-  font-family: 'LXGWNeoXiHei', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+*:focus-visible {
+  @apply outline outline-[2px] outline-carbongray-200;
+}
+
+.border-transparent {
+  border-color: transparent;
+}
+
+.prose {
+  font-weight: lighter;
+}
+
+.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-weight: normal !important;
+}
+
+.prose :where(strong):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  font-weight: bolder !important;
+}
+
+.prose :where(blockquote):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  @apply font-light text-carbongray-200;
+}
+
+.prose img {
+  margin-inline: auto;
+}
+
+.prose :where(blockquote p:first-of-type):not(:where([class~="not-prose"], [class~="not-prose"] *))::before {
+  content: none;
+}
+
+.prose :where(blockquote p:last-of-type):not(:where([class~="not-prose"], [class~="not-prose"] *))::after {
+  content: none;
 }
