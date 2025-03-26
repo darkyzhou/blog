@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '记一次对 CSS FlexBox 的误用'
 export const date = '2020-09-04T20:12:10.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 在使用 FlexBox 布局时，flex: 0 的使用可能会导致在 Safari 中出现意想不到的高度计算问题。本文通过一个实际案例，分析了问题的原因，并给出解决方案
 `
@@ -9,7 +11,7 @@ export const excerpt = `
 
 最近开发某反馈系统的前端，偶然发现顶部导航栏的高度在 MacOS 或 iOS 下的 Safari 中计算异常：
 
-![](/images/uploads/mistake-on-using-flexbox-1.png)
+<BlogImage filePath="mistake-on-using-flexbox/mistake-on-using-flexbox-1" />
 
 首页的布局以及相关的样式大体如下：
 

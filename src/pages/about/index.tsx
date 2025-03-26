@@ -4,8 +4,8 @@ import Content from './content.mdx'
 
 export default async function Index() {
   return (
-    <PageContainer caption="快速了解我">
-      <ArticleContainer>
+    <PageContainer title="关于">
+      <ArticleContainer title="关于">
         <Content />
       </ArticleContainer>
     </PageContainer>

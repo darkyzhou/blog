@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = "如何打造可被摇树优化的库"
 export const date = "2021-06-24T20:16:38.104Z"
-export const category = "前端修炼手册"
+export const category = "web-frontend"
 export const excerpt = `
 深入解析打包工具的摇树优化原理，以及如何构建一个支持摇树优化的 JavaScript 库，从原理到实践的完整指南
 `
@@ -14,7 +16,7 @@ export const excerpt = `
 > * 译者：[darkyzhou](https://github.com/darkyzhou)
 > * 校对者：[Usualminds](https://github.com/Usualminds)、[KimYangOfCat](https://github.com/KimYangOfCat)
 
-![如何打造可被摇树优化的库](/images/uploads/tree-shaking-0.png)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-0" caption='如何打造可被摇树优化的库' />
 
 在 [Theodo](https://www.theodo.fr)，我们致力于为我们的客户打造可靠、快速的应用。我们有一些改进现有应用的性能的项目。在其中一个项目里，**我们通过对内部库进行摇树优化（tree shaking），成功将所有页面的 gzip 压缩后的 bundle 体积减少了足足 500KB。**
 
@@ -45,7 +47,7 @@ export const excerpt = `
 
 网上有很多解释摇树优化和未引用代码移除的文章和资源。这里我们会集中讨论那些应用里中引用的库。当引用一个库的应用能够**成功地移除这个库中未被引用的部分**时，这个库才能被认为做到了摇树优化（tree shakeable）。
 
- ![一个可摇树优化的库的例子](/images/uploads/tree-shaking-1.png)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-1" caption='一个可摇树优化的库的例子' />
 
 在尝试让一个库变得可被摇树优化之前，我们先来看看如何识别一个可摇树优化的库。
 
@@ -185,7 +187,7 @@ __webpack_unused_export__ = getUserPhoneNumber;
 
 Webpack 将我们所有的代码重新组织到了同一个文件里。请看其中的 `getUserPhoneNumer` 导出项，注意到 Webpack 将它标记为了未引用。它会在生产模式下被移除，而 `getUserName` 则会被保留，因为它被我们的入口文件 `index.js` 所使用。
 
-![一个摇树优化后的库对应的一张简单的模块图](/images/uploads/tree-shaking-2.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-2" caption='一个摇树优化后的库对应的一张简单的模块图' />
 
 我们的库被摇树优化了！你可以再写一些导入项，重复上面的步骤再查看输出的代码。**我们的目的是知道 Webpack 会把我们库里没有被引用的代码标记为未引用。**
 
@@ -337,7 +339,7 @@ const userAccount = {
 
 注意，`getUserAccount` 和 `getUserPhoneNumber` 都被标记为了未引用。而且另一个文件里的 `userAccount` 也被标记了。得益于 `innerGraph` 优化，Webpack 能够将 `index.js` 文件里的 `getUserAccount` 导入项链接到 `userAccount` 导出项。**这让 Webpack 可以从入口文件开始，递归遍历它所有的依赖，进而知道每一个模块的哪些导出项未被引用。** 因为 Webpack 知道 `getUserAccount` 没有被使用，所以它可以到 `userAccount` 文件里对 `getUserAccount` 的依赖做相同的检查。
 
-![使用 ESM 格式的库的导出模块图](/images/uploads/tree-shaking-3.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-3" caption='使用 ESM 格式的库的导出模块图' />
 
 ES 模块让我们可以在应用代码里寻找那些被引用的和未被引用的导出项，这也解释了为什么这种模块系统对于摇树优化是如此的重要。它还解释了为什么我们应该使用像 [`lodash-es`](https://www.npmjs.com/package/lodash-es) 这样导出了兼容 ESM 的构建产物的依赖。这里 lodash-es 库是很受欢迎的 [`lodash`](https://lodash.com/) 库的 ESM 版本。
 
@@ -419,7 +421,7 @@ import "myPolyfill";
 
 我们发现，源文件 `userAccount` 已经在打包输出中被移除了。我们仍然能够看到 `getUserAccount` 函数在引用 `userAccount`，不过此函数已经被 Webpack 标记为了未引用代码，它会在代码最小化的过程中被移除。
 
-![副作用优化下的模块图](/images/uploads/tree-shaking-4.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-4" caption='副作用优化下的模块图' />
 
 **`sideEffects` 选项对于那些通过一个 index 文件从其他内部源文件导出 API 的库尤其重要。** 如果没有副作用优化，打包工具就必须解析所有包含导出项的源文件。
 
@@ -603,7 +605,7 @@ const getUserName = () => 'John Doe';
 
 [Lodash](https://lodash.com/) 现在和 `userAccount` 模块一起被略过了。
 
-![在使用 CJS 格式的依赖时，保留模块结构能够改善摇树优化效果](/images/uploads/tree-shaking-5.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-5" caption='在使用 CJS 格式的依赖时，保留模块结构能够改善摇树优化效果' />
 
 #### 代码分割
 
@@ -744,7 +746,7 @@ main();
 
 我们需要记住，引用导出（used exports）优化在检查导出项是否被引用的时候，是在模块层面上检查的。只有从这个层面上 Webpack 才能移除那些未被使用的代码。对于我们的库模块来说，`userAccount` 和 `userPhoneNumber` 其实都被使用了。在这个情况下，Webpack 并不能区分清 `userService1` 和 `userService2` 在导入项上的区别，正如下图所示（你会发现 `userAccount` 和 `userPhoneNumber` 都被标注为绿色）：
 
-![代码分割导致摇树优化出现的问题](/images/uploads/tree-shaking-6.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-6" caption='代码分割导致摇树优化出现的问题' />
 
 **这意味着 [Webpack](https://webpack.js.org/) 在仅依靠引用导出优化的条件下，并不能独立地针对每个 chunk 进行摇树优化。**
 
@@ -812,7 +814,7 @@ main();
 
 `src_userService1_js.main.js` 也和上面类似，仅仅包含了我们库里的 `userAccount` 模块。
 
-![保留模块树可以让 Webpack 独立地对分割的 chunk 进行摇树优化](/images/uploads/tree-shaking-7.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-7" caption='保留模块树可以让 Webpack 独立地对分割的 chunk 进行摇树优化' />
 
 在上图中我们看到，`userAccount` 和 `userPhoneNumber` 仍然被识别为**被引用的导出项**，毕竟它们都在应用里被引用了至少一次。不过，这一次副作用优化让 Webpack 得以略过 `userAccount` 模块，因为它从未被 `userService2` 所导入。同样的事情也发生在了 `userPhoneNumber` 和 `userService1` 之间。
 
@@ -964,7 +966,7 @@ const getUserName = () => 'John Doe';
 /***/ })
 ```
 
-![Webpack的 innerGraph 优化示例](/images/uploads/tree-shaking-8.jpg)
+<BlogImage filePath="how-to-make-a-tree-shakable-library/tree-shaking-8" caption='Webpack的 innerGraph 优化示例' />
 
 Webpack 5 能够完全移除 `userAccount` 模块，但是 Webpack 4 不行，即使 `getUserAccount` 被标记为了未引用。这是因为 `inngerGraph` 优化的算法能够让 Webpack 5 将模块中未引用的导出项和它对应的导入项链接起来。在我们的例子里，`userAccount` 模块仅被 `getUserAccount` 函数所使用，因此可以被直接略过。
 

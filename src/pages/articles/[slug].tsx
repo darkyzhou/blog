@@ -12,10 +12,9 @@ export default async function Index({ slug }: IndexProps) {
     return <div>404</div>
   }
 
-  // TODO: <Meta />
   return (
-    <PageContainer caption={article.title}>
-      <ArticleContainer>
+    <PageContainer title={article.title}>
+      <ArticleContainer title={article.title} category={article.category} date={article.date} excerpt={article.excerpt}>
         <article.default />
       </ArticleContainer>
     </PageContainer>

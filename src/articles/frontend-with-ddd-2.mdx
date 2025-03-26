@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '探究 DDD 在前端开发中的应用（二）：什么是 DDD'
 export const date = '2020-07-29T23:14:54.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 DDD 是一种经典的编程范式，它通过通用语言和限界上下文来对业务需求进行建模。通过这种建模方式，DDD 不仅能帮助开发团队更好地理解和实现业务需求，还能提升团队协作效率，是一个优秀的软件开发工具箱
 `
@@ -19,12 +21,11 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 通用语言是一些单词或者短语的特殊含义，或者开发团队之间形成的各种约定。通用语言是既描述了业务需求，又在代码设计中得到体现。限界上下文则是一个语义和语境上的边界，其中的每个代表软件模型的组件都有着特定的含义，并且处理特定的事务。这里界定所谓“特定”的概念就是通用语言。
 
-![](/images/uploads/frontend-with-ddd-2-1.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-1" />
 
 在大型项目中，一个限界上下文往往对应一个由程序员、领域专家和产品经理等角色构成的开发团队。团队成员之间会在工作交流中使用这种通用语言，并且程序员书写出的软件模型的源代码就是通用语言的书面表达方式。因此，限界上下文和通用语言既是软件结构层面的设计，还是团队结构的设计，这一点和康威定律（Convey's Law）不谋而合。
 
-![](/images/uploads/frontend-with-ddd-2-2.png)
-从漫画中可以看到，负责两个限界上下文的人员的办公室里传出来的语言是明显不同的
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-2" caption='负责两个限界上下文的人员的办公室里传出来的语言是明显不同的' />
 
 要进一步理解通用语言和限界上下文，我们不妨从它们的反面出发：在整个软件中随意使用语言，不划分任何模块。这样做会有什么后果呢？随意使用语言会提升开发团队的沟通成本，还可能导致误解的出现，甚至会导致产出的代码中产生严重的 Bug，或者偏离产品经理的预期。
 
@@ -32,8 +33,7 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 不严格划分模块，意味着负责不同功能的代码会在多次修改之后变得亲密无间，难分你我。这种行为或许在软件开发的初期有着较高的效率，但当软件开发进入维护阶段时，则会给维护软件的程序员带来噩梦，因为不同行为的代码混合在同一个文件夹甚至是同一个文件，导致程序员在下手修改某个行为前都需要仔细辨析相关的代码，甚至在修改后都在提心吊胆，生怕修改的代码会影响到其他功能的正常运行。
 
-![](/images/uploads/frontend-with-ddd-2-3.png)
-对付这样的代码就如同抽积木！
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-3" caption='对付这样的代码就如同抽积木一般危险！' />
 
 ## DDD 建模过程
 
@@ -45,32 +45,31 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 领域专家的存在使得软件开发人员不会在发展通用语言的过程中使其偏离实际的业务，导致整个项目充满了程序员间才懂得的语言，产品经理和程序员间出现沟通障碍等问题。因为领域专家有着和软件开发人员不一样的心智模型。DDD 中尤其强调拥抱业务需求本身，而尽量克制程序员“以技术为中心”的冲动。因此，软件开发人员需要和领域专家亲密合作，共同发展通用语言。
 
-![](/images/uploads/frontend-with-ddd-2-4.png)
-开发人员和领域专家所思考的事务往往是不同层面的
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-4" caption="开发人员和领域专家所思考的事务往往是不同层面的" />
 
 ## DDD 建模过程实例
 
 让我们用一个实际一些的例子来说明这个过程，这个例子将在之后介绍 DDD 继续使用：假如有一个叫做 Vatrix 的课程平台被某公司正式立项，这个课程平台以课程为基础，提供程序设计作业的布置和在线评测功能。现在，假设我们是开发团队的一份子，让我们走进 Vatrix 开发团队的会议室中，参与 Vatrix 的头脑风暴！Vatrix 开发团队的需求分析会议正式开始，有请领域专家、程序员、产品经理等人进场。小明端庄地掏出粉色笔记本，向大家展示了它给出的领域设计草稿。团队成员们开始围绕业务需求进行探讨。
 
-![](/images/uploads/frontend-with-ddd-2-5.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-5" />
 
 有人提出：课程平台应该来一个讨论区，让老师和同学之间可以对题目进行讨论。队员们普遍表示认同，于是平台的领域结构图被扩展了。其中的命名是领域专家和软件开发人员们共同商定的。
 
-![](/images/uploads/frontend-with-ddd-2-6.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-6" />
 
 不一会，又有人跳起来说：咱们是不是忘记了一件重要的东西？我们应该提供一个题库功能供老师们创建和套用到课程中！扩展之后的设计图大家都很满意，于是 DDD 建模进入下一个阶段。
 
-![](/images/uploads/frontend-with-ddd-2-7.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-7" />
 
 此时领域专家上台，将设计图按照通用语言的差异划分出了以下的子域。然后，开发团队将分为四组，各负责一个子域。工作开始后，小组内部会经过多次开发讨论，持续地为了实现业务需求发展子域的通用语言，限界上下文逐渐形成。发展通用语言的方式包括但不局限于：What-Why-How、Use Case、User Story 等，由于篇幅有限这里不作展开。
 
-![](/images/uploads/frontend-with-ddd-2-8.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-8" />
 
 ## 上下文映射
 
 当限界上下文被发展出来之后，DDD 项目的核心域需要和其他限界上下文进行集成，这就是 DDD 的上下文映射（Context Mapping）。如果没有集成，那么我们的团队最后开发出来的成品只是四个孤立的组件而已，只有经过集成才能将它们连接到一起，成为一个能够正常工作的软件。例如，Course 限界上下文需要集成 Problem Database 限界上下文来实现业务需求中的出题功能。
 
-![](/images/uploads/frontend-with-ddd-2-9.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-9" />
 
 上下文映射不仅表示了两个限界上下文的集成关系，还表示了两个团队之间的动态关系。由于不同的限界上下文的通用语言差异较大，因此团队之间处理上下文映射时尤其应当注意克服通用语言差异的鸿沟带来的潜在问题。两个团队之间存在的动态关系可能表现为以下的其中一种：合作关系（Partnership）、共享内核（Shared Kernel）、跟随者（Conformist）、开放主机服务（Open Host Service）。由于篇幅原因只列举了最常见的几种。
 
@@ -88,7 +87,7 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 现在，让我们进入限界上下文内部，看看 DDD 为限界上下文内部的设计提供了什么样的工具。首先值得介绍的就是聚合（Aggregate）的概念。它指的是限界上下文中一个个的代码集合体，由实体或值对象构成，其中有一个处于根节点的实体被称为聚合根（Aggregate Root）。聚合根控制着所有聚集在其中的其他元素，并且它的名称就是整个聚合的名称。一个限界上下文可以存在多个聚合，下面只列出了一个。
 
-![](/images/uploads/frontend-with-ddd-2-10.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-10" />
 
 从聚合开始，DDD 将触角伸向微观层面，指导我们如何结合系统分析，对每一个类进行设计。聚合中有一个非常重要的概念：每个聚合是事务一致性的边界。 所谓事务一致性，指的是在一个聚合中，所有被提交到数据库的事务执行后，整个聚合的所有组成部分必须严格符合业务规则。事务一致性的确定需要开发团队紧密结合业务需求来确定聚合何时处于有效状态，以防止破坏业务的操作发生。
 
@@ -108,7 +107,7 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 这种对聚合之间最终一致性的需求催生了领域事件（Domain Event）的概念。它是一个聚合发布的、由利益相关的限界上下文订阅的事件，通常经由消息机制以发布/订阅的方式实现。下面我们结合上面的例子看一个图例。
 
-![](/images/uploads/frontend-with-ddd-2-11.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-11" />
 
 如上图所示，CourseTook 聚合通过发布 StudentTookCourseEvent 这样一个领域事件到消息机制中，然后对此感兴趣的 MemberList 聚合将接受这个事件，并作出反应。它会从事件中读取到对应的学生学号，并将它加入到课程的成员列表中，最终一致性由此实现。
 
@@ -124,15 +123,15 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 下面让我们通过一段代码来实现上面所说的 CourseTook 聚合，假设它的构成如下图所示，其中 GPA 和 Description 是值对象，Assignments 是实体。我们的第一步是实现聚合的根节点 CourseTook 对应的类。然后再实现聚合根下的各种实体。
 
-![](/images/uploads/frontend-with-ddd-2-12.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-12" />
 
 具体的实现请看本人写的一段 TypeScript 代码。请注意这样的一个类是如何拥抱业务需求，封装业务逻辑的。其中，聚合的实体类一般都会继承一个公共的基类 Entity，这个基类一般会负责维护唯一的实体 ID、比较逻辑，以及为子类提供发布领域事件的 API 等。
 
-![](/images/uploads/frontend-with-ddd-2-13.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-13" />
 
 像这样设计聚合之后，我们的路由处理的逻辑将被大大简化，请看下面的 NestJS 的一段代码。
 
-![](/images/uploads/frontend-with-ddd-2-14.png)
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-14" />
 
 与那些直接将业务逻辑写在路由处理方法中的传统做法不同，我们将业务逻辑全部地保留到了实体本身中，而路由处理方法仅负责组装响应。这种做法与 DDD 中以业务需求为本的思想相统一，实体类中既封装数据，也含有业务需求中对数据做出的约束。这也使得业务逻辑与访问方式脱钩，也就是说，不仅是像上面的 RESTful API 可以复用实体创建逻辑，像 GraphQL 的 Resolver 也可以直接复用。
 
@@ -142,8 +141,7 @@ DDD 作为一个建模工具箱，当然是为了建模而生的。简单来说�
 
 在 DDD 中，Domain 层位于最核心的位置，并且有着一个严格的依赖规则：外层可以依赖内层，但内层不能依赖外层。这就是为什么 Domain 层需要通过领域事件去发布事件的原因。
 
-![](/images/uploads/frontend-with-ddd-2-15.png)
-来自https://www.jdon.com/ddd.html
+<BlogImage filePath="frontend-with-ddd/frontend-with-ddd-2-15" caption="来自 https://www.jdon.com/ddd.html 的图片" />
 
 ## 小结
 

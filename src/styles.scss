@@ -1,5 +1,5 @@
 @use '@ibm/plex-sans-sc/scss' as PlexSansSC with (
-  $font-prefix: 'assets'
+  $font-prefix: '/assets'
 );
 
 @include PlexSansSC.default();

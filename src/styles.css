@@ -2,6 +2,12 @@
 
 @plugin '@tailwindcss/typography';
 
+@custom-variant touch-screen {
+  @media (hover: none) {
+    @slot;
+  }
+}
+
 @theme {
   --font-*: initial;
   --font-sans:
@@ -66,6 +72,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -85,6 +92,10 @@
 
 .prose {
   font-weight: lighter;
+}
+
+.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  font-weight: normal;
 }
 
 .prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {

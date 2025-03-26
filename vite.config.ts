@@ -13,12 +13,6 @@ const REHYPE_PRETTY_CODE_OPTIONS: Options = {
 
 export default {
   plugins: [
-    mdx({
-      rehypePlugins: [
-        [rehypePrettyCode, REHYPE_PRETTY_CODE_OPTIONS],
-        remarkGfm,
-      ],
-    }),
     tailwindcss(),
     tsconfigPaths(),
     viteStaticCopy({
@@ -31,6 +25,12 @@ export default {
           src: 'node_modules/@ibm/plex-mono/fonts/*',
           dest: 'assets/fonts',
         },
+      ],
+    }),
+    mdx({
+      rehypePlugins: [
+        [rehypePrettyCode, REHYPE_PRETTY_CODE_OPTIONS],
+        remarkGfm,
       ],
     }),
   ],

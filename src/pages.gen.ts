@@ -8,6 +8,8 @@ import type { getConfig as AboutIndex_getConfig } from './pages/about/index';
 // prettier-ignore
 import type { getConfig as ArticlesSlug_getConfig } from './pages/articles/[slug]';
 // prettier-ignore
+import type { getConfig as CategoriesSlug_getConfig } from './pages/categories/[slug]';
+// prettier-ignore
 import type { getConfig as CategoriesIndex_getConfig } from './pages/categories/index';
 // prettier-ignore
 import type { getConfig as HardwareIndex_getConfig } from './pages/hardware/index';
@@ -20,6 +22,7 @@ import type { getConfig as StackIndex_getConfig } from './pages/stack/index';
 type Page =
 | ({ path: '/about' } & GetConfigResponse<typeof AboutIndex_getConfig>)
 | ({ path: '/articles/[slug]' } & GetConfigResponse<typeof ArticlesSlug_getConfig>)
+| ({ path: '/categories/[slug]' } & GetConfigResponse<typeof CategoriesSlug_getConfig>)
 | ({ path: '/categories' } & GetConfigResponse<typeof CategoriesIndex_getConfig>)
 | ({ path: '/hardware' } & GetConfigResponse<typeof HardwareIndex_getConfig>)
 | ({ path: '/' } & GetConfigResponse<typeof Index_getConfig>)

@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '因为更新按钮，我卸载了 Arc 浏览器'
 export const date = '2024-07-02T22:43:55.104Z'
-export const category = '随笔'
+export const category = 'thoughts'
 export const excerpt = `
 从一个更新按钮引发的思考，探讨软件更新策略如何在用户体验和产品迭代之间取得平衡，以及开发者应该如何站在用户角度思考问题
 `
@@ -15,7 +17,7 @@ export const excerpt = `
 
 然而，这段蜜月期仅持续了半年多。到了 2023 年下半年，我的满意度逐渐转变为不满，主要原因是频繁出现的更新按钮。Arc 浏览器会自动检查更新，如果有新版本，便会在侧边栏的底部显示一个带有动画效果的提示按钮，这个按钮的高度大约是标签页按钮的两倍，且无法关闭。这个按钮会一直显示，直到你点击它，浏览器会自动下载新版本并重启。如下图所示，你很难不注意到它，因为底部恰好也是切换工作区的按钮所在的位置。
 
-![](/images/uploads/i-uninstalled-arc-0.png)
+<BlogImage filePath="i-uninstalled-arc/the-button" />
 
 从下半年开始，Arc 进入了一个疯狂的版本更新节奏，几乎每天都有新版本发布，有时一天超过两个。这导致我和我的同事们的电脑屏幕上总是有一个跳动的更新按钮。令人沮丧的是，每当我仔细地保存每个标签页的工作，并满怀期待地点击更新按钮，等待浏览器重启后，却几乎看不到任何变化。**频繁的更新似乎没有带来任何明显的改进或新功能**。有时，打开 What's New 页面，其内容与上一个版本无异，或者链接到一个信息密度极低的 YouTube 视频，需要花费一定时间才能了解更新内容（有时候，视频并不会介绍更新内容，而是一些虚无缥缈的宣传）。
 
@@ -37,10 +39,10 @@ export const excerpt = `
 
 由于上述原因，我最终决定卸载 Arc 浏览器，并转向使用 Firefox 的修改版 [Floorp](https://floorp.app/en)。Floorp 提供了丰富的 UI 自定义功能，不会通过弹出更新按钮来打扰用户。我还安装了 [Sidebery](https://github.com/mbnuqw/sidebery) 插件，它提供了类似 Arc 的侧边栏功能，除了支持固定页面、划分工作区之外，它还支持一种被称为树形标签页的功能：假设我在浏览 A 网页，此时我在 A 网页中点击链接打开了 B 网页，又在后者中点开了 C 网页，那么此时的侧边栏会变成下图所示的这样，非常直观。
 
-![](/images/uploads/i-uninstalled-arc-2.png)
+<BlogImage filePath="i-uninstalled-arc/sidebar" />
 
 Firefox 最让我惊喜的是其 [userChrome.css](https://www.userchrome.org/) 功能，允许用户通过 CSS 自定义界面样式。事实上，Firefox 的界面主体（包括顶栏、侧边栏等）都是用 HTML 渲染的，你甚至可以打开[针对它的 DevTool](https://www.userchrome.org/) 来实时地编辑相关组件的样式。Firefox 同样拥有类似 Arc 的 Ctrl+Tab 快速切换标签页功能，且同样带有预览。不过没有 Cmd+T 悬浮菜单，这需要一定时间适应（或许有人应该做个插件来实现这个功能）。
 
 最后，给大家看看我的 Floorp 的界面，这是我经过一番调整后的样子。
 
-![](/images/uploads/i-uninstalled-arc-1.png)
+<BlogImage filePath="i-uninstalled-arc/floorp" />

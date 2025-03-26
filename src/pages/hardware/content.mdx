@@ -1,51 +1,50 @@
-## thehub
+import { BlogImage } from '../../components/BlogImage'
+
+## theresa
 
 - CPU: Intel Core i7-12700T (8P+4E cores, 20 threads)
-- RAM: 2x16GB KLEVV BOLT X DDR4-3200
-- GPU: SAPPHIRE Radeon RX 460 2G GDDR5 OC
-- SSD: KIOXIA EXCERIA G2 1TB
+- RAM: 2x32GB SAMSUNG 2Rx8 DDR4-3200
+- SSD1: KIOXIA EXCERIA G2 1TB
+- SSD2: ZHITAI PC005 Active 256GB
 - Motherboard: MAXSUN MS-CHALLENGER H610ITX 2LAN
-- OS: Proxmox VE 8.2.7
+- OS: NixOS 25.05 (Warbler) x86_64
 
-> 这是我的第五代 All in One 主机，前四代的 CPU 分别是：
+这台主机主要用于日常的 Linux 开发，我给它安装了桌面环境。我原本打算用 [Hyprland](https://hyprland.org/) 作为桌面环境，但实际体验后发现我很难习惯 Tiling 窗口管理器的逻辑。最近我又看上了 [niri](https://github.com/YaLTeR/niri)，目前还在尝试中。
+
+> 这其实是我的第六代 All in One 主机，前五代的 CPU 分别是：
 > - 第一代：Intel Core i3-9100
-> - 第二代：Intel Core i5-8400T
-> - 第三代：AMD Ryzen 5 5800H
-> - 第四代：AMD Ryzen 3 3900X
+> - 第二代：ZHAOXIN KaiXian KX-6640MA
+> - 第三代：Intel Core i5-8400T
+> - 第四代：AMD Ryzen 5 5800H
+> - 第五代：AMD Ryzen 9 3900X
 
-这台主机运行了几台虚拟机，分别用于 x86 平台的日常开发、服务运行和黑苹果。
+这台主机原本安装的是 Proxmox VE，后来我把其中跑各种服务的 VM 搬迁到了下面要介绍的 sirin 上。此时它只剩下用于日常开发的 VM 了，我便将它重装为 NixOS。由此，它已经不能被称作 All in One 主机了。有趣的是，纵观我的六代 All in One 主机，可以发现一个趋势：承担不同职能的 VM 被不断地拆分到其他主机上，包括软路由、NAS 等职能。
 
-- 日常开发：Arch Linux，"I use arch btw"
-- 跑服务：NixOS，直通了核显用于运行 Jellyfin，我的几乎全部服务都在上面
-- 黑苹果：macOS Sonoma 14.16.1，直通了 RX 460，作为下载机
+> 感谢 NixOS 的声明式配置，我几乎零成本地完成了服务的迁移。在新安装 NixOS 的 sirin 主机上，我可以一键应用之前写好的系统配置文件，其中包括各种服务的配置，NixOS 会根据这些配置自动完成各种服务的安装、配置和运行。最终得到和之前几乎完全一样的系统环境。
 
-> 为什么要用黑苹果做下载机？因为 Windows 下的迅雷、百度网盘等软件太臃肿且丑了。
-> MacOS 下的迅雷和 Windows 下的界面差距极大，前者更简洁，且几乎没有广告。
+<BlogImage filePath='hardware/thehub' />
 
-<div className="grid grid-cols-2 gap-4">
-  <figure>
-    <img src="/assets/hardware/thehub.jpg" alt="thehub" className="inline-block text-center h-[320px] w-auto" />
-    <figcaption className="mt-2">拆机图</figcaption>
-  </figure>
-  <figure>
-    <img src="/assets/hardware/thehub2.jpg" alt="thehub" className="inline-block text-center h-[320px] w-auto" />
-    <figcaption className="mt-2">整机图</figcaption>
-  </figure>
-</div>
+上图是装机时拍的。里面的全新电源购于京东自营，但装好插电后发现是坏的，按电源键没有任何反应，我直接退货了。里面还有一张蓝色外壳的显卡，那是下面会专门介绍的 AMD Radeon Pro WX 4100，现在它已经被我换到下面的 herta 主机上了。
+
+<BlogImage filePath="hardware/thehub2" />
+
+主机位于我的书桌下，放在一张宜家的边桌上。
 
 ## timido
 
-- CPU: Intel Core i5-13600KF (6P+8E cores, 20 threads)
-- RAM: 4x16GB JUHOR DDR4-3200
+- CPU: AMD Ryzen 9 9800X3D (8 cores, 16 threads)
+- RAM: 2x32GB ADATA XPG LANCER BLADE DDR5-6000
 - GPU: MSI GeForce RTX 4070 VENTUS 2X 12G OC
-- SSD: SK Hynix Platinum P41 2TB
-- SSD: HP SSD EX950 M.2 512GB
-- Motherboard: ASUS TUF GAMING B760M-PLUS WIFI D4
-- OS: Windows 11 23H2
+- SSD1: SAMSUNG 990 EVO Plus 1TB
+- SSD2: SK Hynix Platinum P41 2TB
+- Motherboard: GIGABYTE B650I AORUS ULTRA WIFI DDR5
+- OS: Windows 11 24H2
 
 这台主机主要用于游戏。
 
-> 目前打算升级到 Ryzen 9 9800X3D，重新组一台机器。现在这台的机箱太丑了，而且系统存在问题。
+<BlogImage filePath="hardware/timido" />
+
+主机位于我的电视旁，机箱是 Acat 的 Abox one。
 
 ## herta
 
@@ -54,42 +53,89 @@
 - GPU: AMD Radeon Pro WX 4100 4GB GDDR5
 - SSD: ZHITAI PC005 Active 256GB
 - Motherboard: ASUS XC-LS3A6M
-- OS: Deepin 23
+- OS: AOSC OS (12.0.4)
 
-> 这台机器除了显卡以外，几乎可以说是由纯国产硬件组成。
+这台主机主要用于龙芯相关的桌面应用测试，例如由我负责维护的 [VSCodium](https://github.com/VSCodium/vscodium) 的龙架构版本。这台主机除了显卡以外，几乎可以说是由纯国产硬件组成。
 
-TODO: WX 4100 的照片
+<BlogImage filePath="hardware/herta" />
 
-## ryuserver
+主机位于我的书桌下，放在了边桌旁边的地面上。
 
-- CPU: Loongson 3A6000-HV @ 2.5GHz (4 cores, 8 threads)
-- RAM: 2x8GB KLEVV DDR4-2666
-- SSD: ZHITAI SC001 256GB
-- Motherboard: Loongson XA61200
-- OS: AOSC OS 12.0.0
+<BlogImage filePath="hardware/wx4100" />
 
-## ryustation
+上图是 AMD Radeon Pro WX 4100 的照片，这里特别放出来，它的外壳设计非常好看。
+
+## yggdrasil
 
 - CPU: Loongson 3C6000 @ 2.2GHz (16 cores, 32 threads)
 - RAM: 4x32GB UniIC DDR4-3200 ECC RDIMM
 - SSD: KIOXIA EXCERIA G2 2TB
-- OS: AOSC OS 11.6.1
+- OS: AOSC OS (12.0.4)
 
-## raven
+这台主机主要用于龙芯的应用开发和维护，例如我维护的 [electron-loong64](https://github.com/darkyzhou/electron-loong64) 项目就是在这台主机上编译的。此外，这台主机还承担了 AOSC 的 Build Worker，负责编译 AOSC 源的各种龙架构软件包。你可以在 [AOSC BuildIt!](https://buildit.aosc.io/workers/54) 上看到这台主机的详情。
 
-- CPU: ZHAOXIN KaiXian KX-6640MA @ 2.2GHz (4 cores, 4 threads)
-- RAM: 1x8GB DDR4-2400
-- SSD: Unknown 256GB
-- OS: NixOS 24.05
+<BlogImage filePath="hardware/yggdrasil" />
 
-## sirin
-
-- CPU: Apple M4 (4P+6E cores, 10 threads)
-- RAM: 16GB LPDDR5X
-- OS: macOS Sonoma 14.16.1
-
-> 2024 年 10 月底于京东抢到的第一批国行 Macbook Pro 14 英寸，带国补。
+上图是机箱内部的照片，主板右下角的插槽是 BMC 槽。这台主机位于我的客厅，因为它的风扇噪音较大。
 
 ## datalake
 
-TODO
+- Model: QNAP TS-532X
+- HDD: 3x8TB WD DC HC320
+- SSD: 2x500GB CRUCIAL MX500
+
+这台主机主要用于 NAS 存储。它被放置在客厅的角落，因为三块 HC320 硬盘的炒豆子般的噪音相当可怕。
+
+<BlogImage filePath="hardware/datalake" />
+
+## sirin
+
+- CPU: Intel N100 (4 cores, 4 threads)
+- RAM: 1x8GB SEIWHALE DDR4-3200
+- SSD: ZHITAI SC005 Active 256GB
+- OS: NixOS 25.05 (Warbler) x86_64
+
+这台主机就是前文所说的，All in One 主机被拆分后，用于跑各种服务的主机。N100 自带的核显的视频编解码性能不错，可以用于 Jellyfin 串流。它运行的其它服务包括 qBittorrent、nginx、[vaultwarden](https://github.com/dani-garcia/vaultwarden) 等。
+
+<BlogImage filePath="hardware/sirin" />
+
+如上图，它的体积相当小巧，功耗很低，我可以把它放在电脑桌上的显示器旁边。
+
+## raven
+
+- CPU: Phytium FT-2000/4 (4 cores, 4 threads)
+- RAM: 2x8GB CXMT 1Rx8 DDR4-3200
+- SSD: SAMSUNG PM851 128GB
+- OS: NixOS 25.05 (Warbler) aarch64
+- Kernel: 6.13.3-aosc-main
+
+这台主机是我的软路由，我在上面运行了 SmartDNS、Tailscale、Dnsmasq 等服务。
+
+> Phytium FT-2000/4 是飞腾公司设计的 SoC，基于 ARMv8 架构。为了让它能够运行主线 Linux，并让 Linux 能够驱动其 SoC 提供的两个 MAC，我花费了一定功夫。详情请见[《给飞腾 FT-2000/4 编译 NixOS》](/articles/compiling-nixos-for-ft2000)。
+
+<BlogImage filePath="hardware/raven1" />
+
+上图是主板的照片，可以看到它有两个网口。事实上，这两个网口都是由 SoC 上的 Phytium DWMAC 和板载的 Realtek RTL8211F PHY 芯片提供的。
+
+<BlogImage filePath="hardware/raven2" />
+
+由于这块 SoC 不自带 GPU，我在上手体验时必须先安装一块显卡。上图里的是摩尔线程的 S30 显卡。
+
+## ex-raven
+
+- CPU: ZHAOXIN KX-6640MA @ 2.5GHz (4 cores, 4 threads)
+
+## vita
+
+- CPU: Apple M4 (4P+6E cores, 10 threads)
+- RAM: 16GB LPDDR5X
+- OS: macOS Sequoia 15.2
+
+> 这是我于 2024 年 10 月底在京东抢到的第一批国行 Macbook Pro 14 英寸，带国补。
+
+这台笔记本是我的主力机，我会用它浏览网页，通过 SSH 连接到本文介绍的各个主机上进行开发和维护。
+
+> 这里特别提一下 NixOS 的另一个特性：远程部署。我可以在笔记本上编辑对应主机的配置文件，然后通过 `nixos-rebuild` 命令远程部署到对应的主机上，并不需要像用其它发行版那样，通过 SSH 登录到对应的主机上手动修改各种配置文件。
+>
+> NixOS 的远程部署还有一个强大的特性：远程交叉编译并部署，例如：我可以在笔记本上同样运行 `nixos-rebuild` 命令，让它在性能较强的 x86_64 主机上交叉编译性能较弱的 aarch64 主机的程序，并通过远程部署到 aarch64 主机上。如果你对此感到兴趣，可以阅读[《远程部署》](https://nixos-and-flakes.thiscute.world/zh/best-practices/remote-deployment)。
+

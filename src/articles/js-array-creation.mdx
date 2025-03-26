@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '如何在 JavaScript 中优雅地创建并初始化数组'
 export const date = '2023-05-03T14:00:00.425Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 探索数组创建与初始化的多种方式，对比分析各种写法的优劣，寻找最佳实践与推荐写法
 `
@@ -33,7 +35,7 @@ Array.from({ length: N }, (_, i) => i); // 5
 
 V8 官方博客上的文章 [Elements kinds in V8](https://v8.dev/blog/elements-kinds) 介绍了 V8 引擎是如何对数组实现进行特殊的设计以加速读写访问的。其中一个重要层面是对数组元素类型的界定，如下图所示：
 
-![](/images/uploads/js-array-creation-1.png)
+<BlogImage filePath="js-array-creation/js-array-creation-1" />
 
 文章里说，V8 引擎会按照元素类型将数组分为若干不同的种类，上图展示了六个大致的种类：
 
@@ -131,7 +133,7 @@ function sumArrayItems(arr) {
 
 作者得到了下图的结果，紧密数组的性能明显优于带洞数组：
 
-![](/images/uploads/js-array-creation-2.png)
+<BlogImage filePath="js-array-creation/js-array-creation-2" />
 
 另一个比较贴近生产的例子是 `Array.reverse()`。在 Chromium 的一个 issue [Array.reverse() is 25x slower than an in-place swapping for loop?](https://bugs.chromium.org/p/chromium/issues/detail?id=1305342) 中，楼主发现在 V8 引擎中调用带洞数组的 `reverse()` 函数要比直接用 `for` 循环实现要慢得多（大约 25 倍）。
 

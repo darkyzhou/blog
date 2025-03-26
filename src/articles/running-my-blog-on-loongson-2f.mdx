@@ -1,0 +1,351 @@
+import { BlogImage } from '../components/BlogImage'
+
+export const title = '在龙芯 2F 上运行我的博客'
+export const date = '2025-03-28T23:12:25.123Z'
+export const category = 'linux'
+export const excerpt = `
+TODO
+`
+
+## 前言
+
+本博客使用的是 waku 框架，一个基于 React 的 SSR/SSG 框架。
+
+手头的龙芯 2F 设备其实是 9003，这款一体机主板因为南桥芯片没有进入 Linux 主线，似乎只能使用 Lemote 出厂提供的 2.6.27 内核（https://github.com/loongson-community/linux-stable/issues/3#issuecomment-402669069）
+
+Node 很久以前 https://github.com/nodejs/node/issues/26179 就已经不带支持 Mips64 架构的版本了，而且像 waku 这样的现代框架对 Node 版本要求比较高，所以似乎没有办法在这台设备上使用 Node 运行。
+
+不过，waku 框架使用的后端框架是 Hono，它并不是一个简单的基于 Node 的框架，而是基于 WinterCG 标准的。
+
+WinterCG 标准定义了在浏览器之外运行 JavaScript 的标准，
+
+理论上我可以使用旧版的 Node 模拟出符合 WinterCG 标准的 JavaScript 运行时，但是这可能需要额外转译 waku 编译后的代码，使其能够在旧版 Node 所支持的 ECMAScript** 标准下运行。**
+
+换句话说，只要我们能提供一个符合 WinterCG 标准的 JavaScript 运行时，就可以在龙芯 2F 上运行 waku 框架。
+
+Txiki.js 就是一个基于 QuickJS 实现的符合 WinterCG 标准的 JavaScript 运行时，我们应该可以尝试交叉编译它。
+
+## 交叉编译 Txiki.js
+
+为什么需要交叉编译 Txiki.js？因为 Txiki 在 CMakelist 里指定最低的 C 版本是 11，而我这台龙芯上的 Debian 6 只能提供 ？ 版本的 GCC。
+
+
+```plain
+$ ct-ng list-samples
+Status  Sample name
+...
+[L...]   mips-ar2315-linux-gnu
+[L...]   mips-malta-linux-gnu
+[L...]   mips-unknown-elf
+[L...]   mips-unknown-linux-gnu
+[L...]   mips-unknown-linux-uclibc
+[L...]   mips64-unknown-linux-gnu
+[L...]   mips64el-multilib-linux-uclibc
+[L...]   mipsel-multilib-linux-gnu
+[L...]   mipsel-sde-elf
+[L...]   mipsel-unknown-linux-gnu
+...
+ L (Local)       : sample was found in current directory
+ G (Global)      : sample was installed with crosstool-NG
+ X (EXPERIMENTAL): sample may use EXPERIMENTAL features
+ B (BROKEN)      : sample is currently broken
+ O (OBSOLETE)    : sample needs to be upgraded
+```
+
+我认为我们应该使用静态编译，这样生成的可执行文件可以不依赖于任何动态库。否则我很担心设备上的 Debian 6 的动态库版本太低，导致 Txiki 无法正常运行，特别是 glibc 的版本。
+
+```
+# 查看这个配置的详细信息
+$ ct-ng show-mips64el-multilib-linux-uclibc
+[L...]   mips64el-multilib-linux-uclibc
+    Languages       : C,C++
+    OS              : linux-6.13
+    Binutils        : binutils-2.43.1
+    Compiler        : gcc-14.2.0
+    Linkers         :
+    C library       : uClibc-ng-1.0.50
+    Debug tools     :
+    Companion libs  : gmp-6.3.0 isl-0.26 mpc-1.3.1 mpfr-4.2.1 zlib-1.3.1 zstd-1.5.6
+    Companion tools :
+
+# 套用这个配置，我们之后需要基于这个配置做其它修改
+$ ct-ng show-mips64el-multilib-linux-uclibc
+```
+
+龙芯 2F 的架构是 MIPS-III-64Bit，它几乎是后来被称为 Mips64el 架构的鼻祖。我们需要运行 `ct-ng menuconfig`，修改其中的配置：
+
+1. 在 Target Options 中将 Architecture Level 设置为 `mips3`
+
+<BlogImage filePath="/running-my-blog-on-loongson-2f/target_options" />
+
+此外，还需要在 Operating System 的 Version of linux 选择 crosstool-NG 所支持的最老的 2.6.32.71 版本（它和 2.6.27 非常接近，只相差一年左右）。
+
+<BlogImage filePath="/running-my-blog-on-loongson-2f/os_options" />
+
+第一次构建出了一些小插曲，磁盘空间不足了。
+
+```
+$ nix-collect-garbage
+...
+deleting '/nix/store/dk538kmncbpyfdz6v6mmw0pdfrs9h0ap-perl5.40.0-Test-Requires-0.11'
+deleting '/nix/store/dr0khc0w9fnk3s3bdcz62azabwn0983w-linux-pam-1.6.1_fish-completions'
+deleting '/nix/store/jqjkkdibdaazpa2wgf5vrlcd1d16qzyi-kbd-mips64el-unknown-linux-gnuabi64-2.7.1-vlock'
+deleting unused links...
+note: currently hard linking saves -0.00 MiB
+21857 store paths deleted, 101229.54 MiB freed
+```
+
+接下来重新运行构建。
+
+```
+$ ct-ng build
+...
+[INFO ]  =================================================================
+[INFO ]  Installing C library
+[INFO ]    =================================================================
+[INFO ]    Building for multilib 1/3: ''
+[EXTRA]      Copying sources to build dir
+[EXTRA]      Applying configuration
+[EXTRA]      Building C library
+[ERROR]      libc/sysdeps/linux/common/clock_adjtime.c:18:2: error: #error "clock_adjtime syscall is not defined!"
+[ERROR]      make[1]: *** [Makerules:373: libc/sysdeps/linux/common/clock_adjtime.os] Error 1
+[ERROR]   
+[ERROR]  >>
+[ERROR]  >>  Build failed in step 'Building for multilib 1/3: '''
+[ERROR]  >>        called in step 'Installing C library'
+[ERROR]  >>        called in step '(top-level)'
+[ERROR]  >>
+[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@378]
+[ERROR]  >>        called from: uClibc_ng_backend_once[scripts/build/libc/uClibc-ng.sh@107]
+[ERROR]  >>        called from: CT_IterateMultilibs[scripts/functions@1610]
+[ERROR]  >>        called from: uClibc_ng_main[scripts/build/libc/uClibc-ng.sh@10]
+[ERROR]  >>        called from: do_libc_main[scripts/build/libc.sh@33]
+[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@712]
+[ERROR]  >>
+[ERROR]  >>  For more info on this error, look at the file: 'build.log'
+[ERROR]  >>  There is a list of known issues, some with workarounds, in:
+[ERROR]  >>      https://crosstool-ng.github.io/docs/known-issues/
+[ERROR]  >>
+[ERROR]  >>  If you feel this is a bug in crosstool-NG, report it at:
+[ERROR]  >>      https://github.com/crosstool-ng/crosstool-ng/issues/
+[ERROR]  >>
+[ERROR]  >>  Make sure your report includes all the information pertinent to this issue.
+[ERROR]  >>  Read the bug reporting guidelines here:
+[ERROR]  >>      http://crosstool-ng.github.io/support/
+[ERROR]   
+[ERROR]  (elapsed: 4:22.22)
+[04:23] / gmake: *** [/usr/local/bin/ct-ng:261: build] Error 2
+```
+
+好吧，看来 uClibc 的版本太高了，以至于它假设了 Linux 内核提供的头文件中存在 `clock_adjtime` 系统调用。
+
+观察 crosstool-NG 的 GitHub 仓库，发现分支里有一个 `1.22` 分支，最后更新于十年前，这个分支上 uClibc 的版本最低是 0.9.33.2，似乎可以尝试使用这个分支。
+
+我在 `debian:9` 镜像中尝试编译这个 crosstool-NG：
+
+```
+deb http://archive.debian.org/debian/ stretch main contrib non-free
+deb http://archive.debian.org/debian/ stretch-proposed-updates main contrib non-free
+deb http://archive.debian.org/debian-security stretch/updates main contrib non-free
+```
+
+```
+# 安装依赖
+$ apt install build-essential autoconf cmake gperf bison flex texinfo wget curl help2man gawk libtool libtool-bin libncurses-dev
+
+$ ./configure
+
+# 编译
+$ make
+
+# 安装
+$ make install
+```
+
+我们接下来重复先前的步骤，对配置进行修改。
+
+```
+# 查看支持的架构
+$ ct-ng list-samples
+...
+[L..]   mips-ar2315-linux-gnu
+[L..]   mips-malta-linux-gnu
+[L..]   mips-unknown-elf
+[L..]   mips-unknown-linux-uclibc
+[L..]   mips64el-n32-linux-uclibc
+[L..]   mips64el-n64-linux-uclibc
+[L..]   mipsel-sde-elf
+[L..]   mipsel-unknown-linux-gnu
+...
+ L (Local)       : sample was found in current directory
+ G (Global)      : sample was installed with crosstool-NG
+ X (EXPERIMENTAL): sample may use EXPERIMENTAL features
+ B (BROKEN)      : sample is currently broken
+
+# 套用这个配置
+$ ct-ng mips64el-n64-linux-uclibc
+
+# 对配置进行修改
+$ ct-ng menuconfig
+```
+
+这里除了修改 Architecture Level 为 `mips3`，以及修改 Operating System 的 Version of linux 为 `2.6.32.71` 之外，还需要在 C-library 中修改 uClibc 的版本为 `0.9.33.2`。
+
+<BlogImage filePath="/running-my-blog-on-loongson-2f/uclibc" />
+
+注意到这个版本的 crosstool-NG 提供的 GCC 版本最高为 5.2.0，应该能够满足 Txiki 依赖的 TODO 的 C11 要求。
+
+我曾尝试使用 Debian 9，但它提供的 GCC 6 无法编译 GCC 5.2.0，似乎和 https://www.reddit.com/r/linuxquestions/comments/ohrn9f/i_cant_compile_gcc_error_const_char_libc_name/ 提到的有关。无奈只能使用 Debian 8，它提供的 GCC 版本是 4.9.2。
+
+接下来运行 `ct-ng build`，中途出现下面的报错：
+
+```
+$ ct-ng build
+...
+[EXTRA]    Retrieving 'isl-0.14'
+[ERROR]   
+[ERROR]  >>
+[ERROR]  >>  Build failed in step 'Retrieving needed toolchain components' tarballs'
+[ERROR]  >>        called in step '(top-level)'
+[ERROR]  >>
+[ERROR]  >>  Error happened in: do_isl_get[scripts/build/companion_libs/121-isl.sh@16]
+[ERROR]  >>        called from: do_companion_libs_get[scripts/build/companion_libs.sh@15]
+[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@591]
+[ERROR]  >>
+[ERROR]  >>  For more info on this error, look at the file: 'build.log'
+[ERROR]  >>  There is a list of known issues, some with workarounds, in:
+[ERROR]  >>      '/usr/local/share/doc/crosstool-ng//B - Known issues.txt'
+[ERROR]   
+[ERROR]  (elapsed: 1:05.47)
+[01:05] / gmake: *** [/usr/local/bin/ct-ng:152: build] Error 1
+```
+
+看来是 `/usr/local/lib/scripts/build/companion_libs/121-isl.sh` 中的下载镜像已经过时了，[这个 issue](https://github.com/crosstool-ng/crosstool-ng/issues/1624) 里提到了新的下载镜像 `https://gcc.gnu.org/pub/gcc/infrastructure`。
+
+```
+https://ftp.gnu.org/gnu/isl/isl-0.26.tar.xz
+```
+
+继续运行 `ct-ng build`，这次遇到了如下的报错：
+
+```
+$ ct-ng build
+...
+[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:692:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
+[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:693:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
+[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:694:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
+[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:695:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
+[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:696:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
+[ERROR]    gmake[2]: *** [Makefile:2429: build/read-rtl.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/genattr.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/genconditions.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/genattr-common.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/gensupport.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/genpreds.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/rtl.o] Error 1
+[ERROR]    gmake[2]: *** [Makefile:2429: build/genautomata.o] Error 1
+[ERROR]    gmake[1]: *** [Makefile:4101: all-gcc] Error 2
+[ERROR]   
+[ERROR]  >>
+[ERROR]  >>  Build failed in step 'Installing pass-1 core C gcc compiler'
+[ERROR]  >>        called in step '(top-level)'
+[ERROR]  >>
+[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@257]
+[ERROR]  >>        called from: do_gcc_core_backend[scripts/build/cc/100-gcc.sh@537]
+[ERROR]  >>        called from: do_gcc_core_pass_1[scripts/build/cc/100-gcc.sh@112]
+[ERROR]  >>        called from: do_cc_core_pass_1[scripts/build/cc.sh@35]
+[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@646]
+```
+
+
+Txiki 要求现代的依赖项，我们需要将编译好的 crosstool-NG 的工具链转移到 Debian 12 上。
+
+```
+$ apt install libcurl4-openssl-dev build-essential cmake autoconf texinfo libtool libltdl-dev
+```
+
+
+编译 openssl：
+
+```
+export CC="/theblog/x-tools/mips64el-n64-linux-uclibc/bin/mips64el-n64-linux-uclibc-gcc"
+export CXX="/theblog/x-tools/mips64el-n64-linux-uclibc/bin/mips64el-n64-linux-uclibc-g++"
+export CFLAGS="-march=mips3 -mabi=64 -EL -static"
+export CXXFLAGS="-march=mips3 -mabi=64 -EL -static"
+export LDFLAGS="-static"
+```
+
+又遇到了下面的报错。看来我们用 crosstool-NG 编译的工具链不足以编译现代的 openssl。
+
+```
+...
+./libcrypto.a(libcrypto-lib-bio_sock.o): In function `BIO_gethostbyname':
+bio_sock.c:(.text+0x62c): warning: gethostbyname is obsolescent, use getnameinfo() instead.
+./libssl.a(libssl-lib-json_enc.o): In function `ossl_json_f64':
+json_enc.c:(.text+0x208c): undefined reference to `__isnan'
+json_enc.c:(.text+0x20a8): undefined reference to `__isinf'
+/theblog/x-tools/mips64el-n64-linux-uclibc/bin/../mips64el-n64-linux-uclibc/sysroot/usr/lib64/libdl.a(libdl.os): In function `_dl_parse_relocation_information':
+libdl.c:(.text+0x1684): undefined reference to `TLS_DTPREL_VALUE'
+libdl.c:(.text+0x16b0): undefined reference to `TLS_DTPREL_VALUE'
+libdl.c:(.text+0x16c8): undefined reference to `TLS_TPREL_VALUE'
+libdl.c:(.text+0x16e8): undefined reference to `TLS_TPREL_VALUE'
+libdl.c:(.text+0x16f0): undefined reference to `TLS_TPREL_VALUE'
+collect2: error: ld returned 1 exit status
+make[1]: *** [Makefile:14728: apps/openssl] Error 1
+make[1]: Leaving directory '/theblog/openssl-3.4.1'
+make: *** [Makefile:2989: build_sw] Error 2
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+$ tjs run serve-txiki.js 
+AsyncLocalStorage is not available
+ReferenceError: could not load 'node:async_hooks'
+```
+
+https://developers.cloudflare.com/workers/runtime-apis/nodejs/asynclocalstorage/
+
+
+
+
+```
+RangeError: invalid array length
+    at set (native)
+    at <anonymous> (polyfills.js:1:93174)
+```
+
+
+
+
+
+
+
+
+```
+$ ls
+lost+found  nix  nix-path-registration
+```

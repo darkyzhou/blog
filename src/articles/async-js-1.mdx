@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '浅谈 JavaScript 异步编程（一）：JS 异步编程的含义'
 export const date = '2020-04-24T11:12:25.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 JavaScript 是一门单线程的语言，但通过异步编程可以实现并发。本文将介绍 JavaScript 中异步编程的基本概念，包括同步与异步的区别、并发的含义，以及异步并发的具体实现方式
 `
@@ -14,7 +16,7 @@ JavaScript 是一门单线程的语言，但通过异步编程可以实现并发
 
 让我们设想一个场景：有一天中午，我从教学楼里走出来，正想着去吃饭，突然一时兴起在图书馆里找一本书，于是拿出手机向图书管理员打电话。
 
-![高颜值的我与图书管理员在线对谈](/images/uploads/async-js-1-1.png)
+<BlogImage filePath="async-js/async-js-1-1" alt="高颜值的我与图书管理员在线对谈" />
 
 接下来，我们分别用同步和异步去理解这个过程：
 
@@ -38,7 +40,7 @@ JavaScript 是一门单线程的语言，但通过异步编程可以实现并发
 
 不过，这并不意味着 JavaScript 不能借助外力来同时处理多个任务。还记得前面的漫画吗？我挂断电话后可以去食堂吃饭，但是此时找书的任务仍然在进行中。因为我将这个任务甩给了图书管理员，而他向我保证会在之后将结果告诉我。于是，我通过打电话给图书管理员这一异步操作，做到了一边找书一边吃饭。这种并发叫分时并发。
 
-![一边找书一边恰饭](/images/uploads/async-js-1-2.png)
+<BlogImage filePath="async-js/async-js-1-2" alt="一边找书一边恰饭" />
 
 ## JS 里的异步并发例子
 
@@ -47,7 +49,7 @@ JavaScript 是一门单线程的语言，但通过异步编程可以实现并发
 - 读取一个文件
 - 打印 `do something else`
 
-![](/images/uploads/async-js-1-3.png)
+<BlogImage filePath="async-js/async-js-1-3" alt="JS 里的异步并发例子" />
 
 我们的代码将读取文件的任务交给了 Node.js，然后打印了 do something else，最后 Node.js 读取文件完成，将最终结果输入 Callback 并交给 JS 引擎执行。
 
@@ -71,7 +73,7 @@ JS 自 1995 年诞生开始就是一门单线程的脚本语言，起初的设�
 
 JS 向运行环境发出若干个任务的指令，任务由运行环境完成并通知 JS，这一过程正是所谓的“异步并发”， 由此我们不难理解为什么“异步并发”是 JS 的一大特色了。
 
-![JS: like a boss](/images/uploads/async-js-1-4.png)
+<BlogImage filePath="async-js/async-js-1-4" alt="JS: like a boss" />
 
 ## 偏科的 JS
 
@@ -79,13 +81,13 @@ JS 向运行环境发出若干个任务的指令，任务由运行环境完成�
 
 不过，它并不适合计算密集型场合，因为它只是一个单线程的“老板”，如果单看干活的多少，它显然不可能干得比两个人多。因此像 bcrypt 这样的加密库不得不像 I/O 相关的 API 那样借助多线程的 C++的力量来执行任务。
 
-![](/images/uploads/async-js-1-5.png)
+<BlogImage filePath="async-js/async-js-1-5" alt="JS 偏科" />
 
 Node.js 在 Web 服务端领域占领的份额，其实主要集中在中间件等典型的高并发 I/O 密集型设施，其中一大关键原因就是因为 JS 的上述“偏科”缺陷。
 
 另外，JS 单线程的设计也导致它难以充分利用多核 CPU 的性能，虽然 Node.js 能够通过 child_process 等方式实现这一点，但在 Web 服务端中的计算领域，相比其他成熟的方案（Java、C++等）优势并不明显，因此 Node.js 直到今天也难以撼动这些方案的地位。
 
-![面对Java无能狂怒的JS](/images/uploads/async-js-1-6.png)
+<BlogImage filePath="async-js/async-js-1-6" alt="面对Java无能狂怒的JS" />
 
 ## 链接
 

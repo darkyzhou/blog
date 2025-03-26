@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
+import { BlogStats } from '@/components/BlogStats'
+import { Footer } from '@/components/Footer'
 import { Link } from 'waku'
 import { NavBar } from '../components/NavBar'
 import { SidebarButton } from '../components/SidebarButton'
-import { CarbonArrowUpRight } from '../icons/CarbonArrowUpRight'
 import '../styles.css'
 import '../styles.scss'
 
@@ -13,10 +14,9 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <div
-      className="px-12 lg:px-16 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 h-[100dvh] w-[100dvw] bg-carbongray-900 relative"
-      style={{ gridTemplateRows: '25dvh 12.5dvh 1fr' }}
+      className="md:px-12 lg:px-16 xl:px-32 h-[100dvh] w-[100dvw] bg-carbongray-900 relative grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25dvh_25dvh_12.5dvh_1fr] md:grid-rows-[25dvh_12.5dvh_1fr]"
     >
-      <div className="absolute left-0 top-0 right-0 h-[25dvh] px-12 lg:px-16 ">
+      <div className="absolute left-0 top-0 right-0 h-[25dvh] md:px-12 lg:px-16 xl:px-32">
         <video
           loop
           muted
@@ -30,74 +30,71 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         </video>
         <NavBar />
       </div>
-      <aside className="row-start-2 row-span-2 col-span-2 bg-carbongray-800 flex flex-col">
-        <div className="bg-carbongray-50 flex-none">
-          <div className="p-4 pb-2">
-            <img src="/assets/avatar.jpg" alt="avatar" className="w-full h-full object-cover aspect-square" />
+      <aside className="row-start-2 row-end-2 md:row-end-4 col-span-full md:col-span-2 bg-carbongray-900 md:bg-carbongray-800 grid grid-cols-subgrid grid-rows-subgrid md:flex md:flex-col text-carbongray-100 md:border-x border-carbongray-600">
+        <div className="flex-none col-span-3 flex flex-col border-r md:border-none border-carbongray-600/40">
+          <div className="flex-1 min-h-0 bg-carbongray-800 relative">
+            <img src="/assets/avatar.jpg" alt="avatar" className="w-full h-full object-cover aspect-square brightness-90 saturate-90" draggable={false} />
+            <div
+              className="absolute inset-0"
+              style={{
+                backdropFilter: 'blur(8px) saturate(120%) brightness(60%)',
+                WebkitMask: 'linear-gradient(to right, black 16px, transparent 16px), linear-gradient(to left, black 16px, transparent 16px), linear-gradient(to bottom, black 16px, transparent 16px), linear-gradient(to top, black 16px, transparent 16px)',
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center',
+              }}
+            >
+            </div>
           </div>
-          <p className="text-carbongray-700 text-xl px-4 pb-4 font-bold">
-            darkyzhou
-          </p>
         </div>
-        <div className="grid grid-rows-4 flex-1 text-carbongray-100">
-          <Link to="/about" className="flex">
-            <SidebarButton as="div" path="/about">
-              快速了解我
-            </SidebarButton>
-          </Link>
-          <Link to="/hardware" className="flex">
-            <SidebarButton as="div" path="/hardware">
-              我的硬件们
-            </SidebarButton>
-          </Link>
-          <Link to="/stack" className="flex">
-            <SidebarButton as="div" path="/stack">
-              技术和项目
-            </SidebarButton>
-          </Link>
-          <div className="grid grid-cols-2">
-            <SidebarButton as="a" href="mailto:me@zqy.io" className="w-full">
-              <div className="grid grid-rows-2 w-full">
-                <span className="flex justify-between items-center w-full">
-                  Email
-                  <CarbonArrowUpRight strokeWidth={4} className="opacity-0 size-4 group-hover:opacity-100 transition-opacity duration-300" />
-                </span>
-                <span className="text-carbongray-400 group-hover:text-carbongray-600 transition-colors duration-300">me@zqy.io</span>
+        <div className="col-start-4 col-span-full md:contents">
+          <div className="grid grid-rows-4 md:grid-rows-5 flex-1 h-full border-t md:border-none border-carbongray-600/40">
+            <Link to="/about" className="flex" unstable_prefetchOnView scroll>
+              <SidebarButton as="div" path="/about">
+                快速了解我
+              </SidebarButton>
+            </Link>
+            <Link to="/stack" className="flex" unstable_prefetchOnView scroll>
+              <SidebarButton as="div" path="/stack">
+                技术和项目
+              </SidebarButton>
+            </Link>
+            <Link to="/hardware" className="flex" unstable_prefetchOnView scroll>
+              <SidebarButton as="div" path="/hardware">
+                我的硬件们
+              </SidebarButton>
+            </Link>
+            <div className="grid border-none md:border-b border-carbongray-600/40">
+              <SidebarButton as="a" href="mailto:me@zqy.io" className="w-full">
+                <div className="flex justify-between items-center w-full">
+                  <span>Email</span>
+                  <span className="text-xs md:text-base text-carbongray-400 group-hover:text-carbongray-600 transition-colors duration-300 font-mono tracking-tighter">me@zqy.io</span>
+                </div>
+              </SidebarButton>
+              <SidebarButton as="a" href="https://github.com/darkyzhou" target="_blank" rel="noreferrer noopener" className="h-full">
+                <div className="flex justify-between items-center w-full">
+                  <span>GitHub</span>
+                  <span className="text-xs md:text-base text-carbongray-400 group-hover:text-carbongray-600 transition-colors duration-300 font-mono tracking-tighter">darkyzhou</span>
+                </div>
+              </SidebarButton>
+            </div>
+            <div className="text-carbongray-400 hidden md:flex flex-col justify-center text-xs px-4 pb-2 py-4">
+              <div>
+                <Footer />
               </div>
-            </SidebarButton>
-            <SidebarButton as="a" href="https://github.com/darkyzhou" target="_blank" rel="noreferrer noopener" className="h-full border-l">
-              <div className="grid grid-rows-2 w-full">
-                <span className="flex justify-between items-center w-full">
-                  GitHub
-                  <CarbonArrowUpRight strokeWidth={4} className="opacity-0 size-4 group-hover:opacity-100 transition-opacity duration-300" />
-                </span>
-                <span className="text-carbongray-400 group-hover:text-carbongray-600 transition-colors duration-300">darkyzhou</span>
-              </div>
-            </SidebarButton>
-          </div>
-          <div className="text-carbongray-400 text-xs px-4 pb-2 border-t border-carbongray-600/40 py-4">
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer noopener" className="block mb-1 hover:underline">
-              粤 ICP 备 2022082297 号
-            </a>
-            <p className="text-balance">
-              <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer noopener" className="hover:underline">
-                CC BY-NC-SA 4.0
-              </a>
-              <span> 2013-PRESENT © darkyzhou</span>
-            </p>
+            </div>
           </div>
         </div>
       </aside>
       <div
-        className="absolute top-[25dvh] bottom-0 left-0 w-12 lg:w-16 py-2 px-1 flex items-end select-none"
+        className="hidden md:flex absolute top-[25dvh] bottom-0 left-0 w-12 lg:w-16 xl:w-32 py-2 px-1 items-end select-none"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
           transform: 'rotate(-180deg)',
         }}
       >
-        <div className="flex-1 text-carbongray-200 text-sm font-mono font-light">
-          Powered by Loongson 3A6000-HV @ 2.50GHz (4 cores, 8 threads)
+        <div className="flex-1 text-carbongray-400 text-xs font-mono px-2">
+          <BlogStats />
         </div>
       </div>
       {children}

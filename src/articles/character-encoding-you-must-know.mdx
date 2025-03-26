@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '关于字符编码，这些知识一定要知道'
 export const date = '2021-03-15T15:23:38.104Z'
-export const category = '编程杂谈'
+export const category = 'programming-miscellaneous'
 export const excerpt = `
 深入浅出字符编码基础知识，从 ASCII、GBK 到 Unicode，了解包括 Emoji 在内的各种常见的文字编码方案的演进历史与应用场景
 `
@@ -37,7 +39,7 @@ export const excerpt = `
 
 对于各个科班出身的程序员来说，ASCII 可能是在大一上学期时就接触到了。它是美国在上世纪60年代推出的字符编码，它囊括了英文26个字母的大小写形式、以及一些标点符号和特殊的控制字符（Control codes），如下图所示：
 
-![](/images/uploads/character-encoding-you-must-know-1.png)
+<BlogImage filePath="character-encoding-you-must-know/1" />
 
 它使用了7个比特对上述字符进行编码，例如二进制1100001对应十进制数字97，对应小写字母“a”。使用 ASCII 编码读取一个内容为“11010001100101110110011011001101111”的文本文件，可以得到“hello”。
 
@@ -63,9 +65,9 @@ printf("Hello\rWorld");
 
 这是欧洲国家基于 ASCII 扩展出来的**一系列字符编码规范**，这系列规范总共有十多个，涵盖了欧洲各个国家使用的各种字符。例如，其中的 ISO/IEC 8859-1 字符编码主要包含了西欧国家（德国、法国等）所使用的字符，如下图所示：
 
-![](/images/uploads/character-encoding-you-must-know-2.png)
+<BlogImage filePath="character-encoding-you-must-know/2" />
 
-ISO/IEC 8859-1 字符编码还有一个很常见的别称“Latin1”，我们在很多语言如 Python 或者文本编辑器上都能看到“Latin1”的身影。而 Windows 的英文版（以及许多西欧语言的版本）使用的默认字符编码为 CP-1252（亦称为 Windows-1252），它在 Latin1 编码的基础上添加了一些额外的字符，如欧元字符，因此与 Latin1 编码基本兼容。
+ISO/IEC 8859-1 字符编码还有一个很常见的别称“Latin1”，我们在很多语言如 Python 或者文本编辑器上都能看到“Latin1”的身影。而 Windows 的英文版（以及许多西欧语言的版本）使用的默认字符编码为 CP-1252（亦称为 Windows-1252），它在 Latin1 编码的基础上添加了一些额外的字符，如欧元字符，因此与 Latin1 编码基本兼容。
 
 ### GB/T 2312-1980
 
@@ -104,7 +106,7 @@ GBK 在 1993 年被微软公司发布，并且自此之后**一直都是 Windows
 #### 屯屯屯和烫烫烫
 
 也许你曾经看过下面这样的段子，或者碰到过类似的神奇乱码：
-![](/images/uploads/character-encoding-you-must-know-3.png)
+<BlogImage filePath="character-encoding-you-must-know/3" />
 
 这些神奇的乱码是如何产生的？据笔者查找资料，原来是 Windows 平台上的 VC++ 编译器在调试模式下会自动将未初始化的栈内存的值填充为 0xCC，将未初始化的堆内存的值填充为 0xCD。同时，由于在简体中文版 Windows 下的命令提示符（cmd）使用的默认文字编码为 GBK。那么，当遇到一连串的 0xCC 时，系统就会按照 GBK 编码解释 0xCCCC 得到了“烫”；遇到一连串的 0xCD 时，系统解释 0xCDCD 得到了“屯”。
 
@@ -136,7 +138,9 @@ false
 
 事实上，后者的 Unicode 码点为 U+00E9，而前者的 Unicode 码点为 U+0065、U+0301。后者是一个单独的字符，但前者是一个英文小写字母“e”加上一个特殊的符号。这个特殊的符号会给前面的像“e”这样的字符的顶部显示一个斜点。除了这个特殊字符外，Unicode 还有很多类似的给前面的字符顶部或底部加上记号的特殊字符。它们被 Unicode 统一称为 Acute accent，主要用于像拉丁语、希腊语这样的语言的文字显示上。
 
-于是，有人想到可以给字符叠加几十个甚至几百个这样的特殊字符，从而得到一些显示效果非常诡异的文字，例如“H̴͓̪̩̟̳̺̠̫̤͉̭̗̊̏͑e̷̛̮̠͖͕̝͍̤l̸̛̮͈͍̬̇̈͌́̌̑̎̿͌͝l̶͔͕̀̒̋͐ȍ̷̡̧̦̘̹̺̫̟̭̣͂̌͗̍̽͒̈͑̋̈́͂͑̄͠ ̴̨̲͓̙̺̰͖̞̯̼̝͚̦̐̈́͊̂̊́͊̚ͅw̷̝͍͑̋͐̂͘o̸̱̽̈̓̌̅̽̑́̔͒̃̏̅͗r̶͙͖̬͙̚͝ͅl̴̨͇͙͇̯̬͔̙̞͛̑̈̀͑̓̉̈́͒̾͠͝d̷̠͙̲̗̲̍̐̅”。也有的人会使用 Acute accent 给同一个字符叠加上百个的字符，创造一个显示出来高度甚至突破了字符所在的那行，盖过了其他行的神奇字符。前几年笔者在贴吧、QQ等平台上就常常见到有人转发这些文字。
+于是，有人想到可以给字符叠加几十个甚至几百个这样的特殊字符，从而得到一些显示效果非常诡异的文字，如下图所示。也有的人会使用 Acute accent 给同一个字符叠加上百个的字符，创造一个显示出来高度甚至突破了字符所在的那行，盖过了其他行的神奇字符。前几年笔者在贴吧、QQ等平台上就常常见到有人转发这些文字。
+
+<BlogImage filePath="character-encoding-you-must-know/10" />
 
 #### Unicode Normalization Forms（标准型）
 
@@ -154,7 +158,7 @@ UTF-8 是一套面向 Unicode 的变长（Variable-width）字符编码规范。
 
 UTF -8 应该是程序员最为耳熟的一个字符编码规范了，在 Web 领域，超过97%的网页使用了 UTF-8 字符编码。值得一提的是，他的作者是 Rob Pike 和 Ken Thompson，后者正是 C 语言的作者。他们同时也是 Go 语言的作者之一。
 
-![](/images/uploads/character-encoding-you-must-know-4.png)
+<BlogImage filePath="character-encoding-you-must-know/4" />
 
 左图为年轻时的 Rob Pike，右图为在贝尔实验室工作时的 Ken Thompson（坐着的那位）
 
@@ -162,7 +166,7 @@ UTF -8 应该是程序员最为耳熟的一个字符编码规范了，在 Web �
 
 既然使用如此广泛，我们有必要稍微深入地研究一下 UTF-8，它的编码规则如下图所示：
 
-![](/images/uploads/character-encoding-you-must-know-5.png)
+<BlogImage filePath="character-encoding-you-must-know/5" />
 
 针对不同范围编号的 Unicode 字符，UTF-8 会将它编码为不同长度的比特流。你也许会发现，UTF-8 其实理论上能够编码2<sup>21</sup>个字符，这比 Unicode 现在包含的字符总数还要多的多。但是，为了安全起见，UTF-8 最高能表示的 Unicode 编号被限制在了 U+10FFFF。因此，UTF-8 能够编码的 Unicode 字符范围是 U+0000 ～ U+10FFFF。
 
@@ -239,19 +243,19 @@ Emoji 是一套字符集，被列入了 Unicode 中。**但是，Emoji 除了引
 
 这里需要强调一个容易混淆的概念：**Emoji 标准只是一套字符集，只定义了“什么字符是 Emoji”，以及“某个字符具体叫做什么（也就是有什么要素）”，但没有定义“Emoji 具体长什么样子”。** 你看到的各种 Emoji 字符的外观是由 Emoji 字体所决定的。很多厂商都有开发自己的 Emoji 字体，例如苹果公司给 iOS、MacOS 等自家产品的系统上引入了 Apple Color Emoji 字体，又如微软在 Windows 10 上引入 Segoe UI Emoji 字体。不同厂家的 Emoji 字体都长得不太一样。例如下面的图片展示了“红包”这个 Emoji （U+1F9E7）在不同 Emoji 字体中的样式：
 
-![](/images/uploads/character-encoding-you-must-know-6.jpg)
+<BlogImage filePath="character-encoding-you-must-know/6" />
 
 图片来自 Emojipedia
 
 同时，有些厂商的字体会被“添加私货”。例如，微软的 Segoe UI Emoji 字体将没有被列入 Emoji 规范的其他麻将字符也提供了 Emoji 的样式。**因此，在 Windows 上，如果程序正确使用了 Segoe UI Emoji 字体，那么你看到的麻将字符很可能都长得很像 Emoji，但其实除了红中都不属于 Emoji。** 例如下图中就是 Segoe UI Emoji 字体里的两万：
 
-![](/images/uploads/character-encoding-you-must-know-7.png)
+<BlogImage filePath="character-encoding-you-must-know/7" />
 
 图片来自 Emojipedia
 
 但是，在笔者使用的 Ubuntu 20.04 上，这个两万字符会显示成这样：
 
-![](/images/uploads/character-encoding-you-must-know-8.png)
+<BlogImage filePath="character-encoding-you-must-know/8" />
 
 #### Emoji 与 Unicode Zero-width joiner
 
@@ -280,7 +284,7 @@ false
 
 Emoji 规范里也定义了很多特殊用途的字符，例如这里要介绍的六个 Emoji Modifier Fitzpatrick Type-N，其中 N 为从1到6（在 Unicode 中的码点从 U+1F3FB 到 U+1F3FF）。这六个特殊字符用于给 Emoji 中的与肤色相关的表情附上肤色信息，如下表的例子所示：
 
-![](/images/uploads/character-encoding-you-must-know-9.png)
+<BlogImage filePath="character-encoding-you-must-know/9" />
 
 这里的 Fitzpatrick 是一个人名，这位科学家在对人类的肤色种类的分类上作出了卓越贡献。
 

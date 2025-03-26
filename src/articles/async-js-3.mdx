@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '浅谈 JavaScript 异步编程（三）：JS 异步编程的发展'
 export const date = '2020-04-26T11:12:25.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 JavaScript 异步编程从混乱的 Callback 时代发展到今天的 Promise 规范。本文将介绍 Callback 存在的问题，以及 Promise 如何解决这些问题，成为 JS 异步编程的“正规军”
 `
@@ -11,7 +13,7 @@ JavaScript 异步编程从混乱的 Callback 时代发展到今天的 Promise �
 
 在 Promise 还未出现的年代，人们只是在“要有 Callback”上达成了广泛共识，并没有在“Callback 应该需要什么参数”、“Callback 应该什么时候调用、怎么调用”这类细节问题上形成统一的标准。并且，从形式上看，Callback 是一个作为参数的函数，如果出现复杂的异步任务，人们很容易写出嵌套的 Callback，既不美观，又影响了程序员的思维。同时，Callback Hell 的产生又让人们伤透了脑筋。
 
-![](/images/uploads/async-js-3-1.png)
+<BlogImage filePath="async-js/async-js-3-1" alt="Callback Hell" />
 
 对于一些复杂的异步任务，人们很容易写出像上图这样糟糕的代码。这种层层嵌套的 Callback 又被成为 Callback Hell。
 
@@ -19,7 +21,7 @@ Callback Hell 不仅难以阅读，更为严重的是它能够打乱程序员对
 
 与此同时，几乎每一个广泛使用的库或者其他 API 对自己异步操作的 Callback 都有着不同的设计。这些各自不同的设计让当时的人们很是痛苦，每用一个 API 就要去查一查参数、异常处理等细节的文档。看看下面这几个常见的异步 API 到底使用了多少种不同的设计方案：
 
-![](/images/uploads/async-js-3-2.png)
+<BlogImage filePath="async-js/async-js-3-2" />
 
 缺乏细节而又容易产生问题的几个例子：
 
@@ -30,7 +32,7 @@ Callback Hell 不仅难以阅读，更为严重的是它能够打乱程序员对
 
 在这个例子中，我们的程序要在运货 API 检查到缺货并抛出错误时，给已经付款的用户退款 1000 美元；在检查到货品充足时给用户显示成功信息。
 
-![](/images/uploads/async-js-3-3.png)
+<BlogImage filePath="async-js/async-js-3-3" />
 
 可是，我们没有想到的是，运货 API 检查缺货的过程中会同时进行很多小步骤，而每一个小步骤出错都可以导致这个 Callback 被调用，也就是说这个 Callback 可能会被用异常对象调用多次，你会给用户多退款好几千美元！
 
@@ -61,13 +63,13 @@ Promise 是**异步操作的抽象封装**，它对这些异步操作进行了�
 
 这样的设计很好地缓解了异步 API 的信赖问题，因为当这些 API 都采用 Promise API 之后，我们在处理这些 Promise 的方式上就能获得统一性，从而让我们得以将宝贵的注意力集中在我们真正需要关心的部分——具体的业务数据上。
 
-![](/images/uploads/async-js-3-4.png)
+<BlogImage filePath="async-js/async-js-3-4" />
 
 ## Promise Chain
 
 Promise API 除了 Promise 的理念外，还引入了功能强大的 Promise Chain。下图就是先前的 Callback Hell 例子用 Promise 改写后的版本（假定 fs 库支持 Promise）。这里，每一个 then 函数的参数都是一个接受上一个 Promise 的结果，产生下一个 Promise 的函数。也就是说，我们能通过 Promise Chain 将一系列复杂的异步操作用 Promise 表达，并将它们串联起来构成一个可读性极佳的整体，成功地摆脱了 Callback Hell！
 
-![Promise Chain 的例子](/images/uploads/async-js-3-5.png)
+<BlogImage filePath="async-js/async-js-3-5" />
 
 `then` 函数也接受第二个参数用于处理上一个 Promise 的错误，默认抛给下一个 then 函数。`catch` 函数是一个特殊的 `then` 函数，它只接受处理错误的函数。
 
@@ -75,25 +77,25 @@ Promise API 除了 Promise 的理念外，还引入了功能强大的 Promise Ch
 
 自从 Promise API 正式推出以后，各大异步 API 以及浏览器的许多 API 都跟进了对 Promise 的支持。在 2020 年的今天，我们能接触到的绝大多数与异步操作相关的 API 都提供了对 Promise API 的支持（除了 Node.js 的官方库之外）。
 
-![浏览器中新推出的用以取代老旧的 XMLHttpRequest API 的 Fetch API](/images/uploads/async-js-3-6.png)
+<BlogImage filePath="async-js/async-js-3-6" alt="浏览器中新推出的用以取代老旧的 XMLHttpRequest API 的 Fetch API" />
 
-![ES2020 标准中引入的 Dynamic Import](/images/uploads/async-js-3-7.png)
+<BlogImage filePath="async-js/async-js-3-7" alt="ES2020 标准中引入的 Dynamic Import" />
 
 ## Promise API 的不足
 
 Promise API 并非完美无瑕。虽然 Promise Chain 让复杂的异步操作代码的可读性大大提高，但其实并没有从本质上解决 Callback 模式的一大核心痛点：不符合人脑的“同步思维”。人脑习惯于以时间先后顺序连贯地思考一系列复杂的操作，但无论是 Callback 还是 Promise Chain，都在某种程度上打断了思维的连贯性。
 
-![在“先”与“后”之间始终存在着阻隔思维流的代码](/images/uploads/async-js-3-8.png)
+<BlogImage filePath="async-js/async-js-3-8" alt="在“先”与“后”之间始终存在着阻隔思维流的代码" />
 
 ## 后起之秀 async/await
 
 我们看来还是习惯于平常编写的同步式的代码。要算一个平方并输出，我就先 `let square`，再 `square = getXXX()`，然后 `console.log(square)` 就好了，这很符合我的思维习惯。于是有人利用 ES6 标准中引入的 Generator，实现了用同步式的代码去表达 Promise Chain！
 
-![](/images/uploads/async-js-3-9.png)
+<BlogImage filePath="async-js/async-js-3-9" />
 
 `function` 后的星号表示这是一个 Generator，而 `yield` 表示产出后面的 Promise。Generator 在执行到 `yield` 并产出值之后就会暂停执行，直到外部调用 `next()` 才能恢复执行，直到下一个 `yield`，由此往复直到末尾。
 
-![](/images/uploads/async-js-3-10.png)
+<BlogImage filePath="async-js/async-js-3-10" />
 
 要运行这个 Generator，需要借助一个特殊的函数的帮助：它会自动处理通过 `yield` 产出的 Promise，并将 Promise 的结果用 `next()` 塞回去，然后 Generator 继续运行到下一个 `yield xxx`，直至末尾。
 
@@ -101,7 +103,7 @@ Promise API 并非完美无瑕。虽然 Promise Chain 让复杂的异步操作�
 
 好消息是，这种创造性的用法马上就被列入到了 ES7 标准当中，那个特殊的函数已经被纳入了 JavaScript 的引擎之中，不必再额外写上。并且，为了改善可读性，ES7 还专门增加了两个关键字：`async` 和 `await`。让我们用 async/await 重构上面的例子（仅是示例，fs api 至今不支持 async/await）：
 
-![](/images/uploads/async-js-3-11.png)
+<BlogImage filePath="async-js/async-js-3-11" />
 
 如今 async/await 在 JavaScript 的各大运行环境中都有了广泛的支持。
 
@@ -109,7 +111,7 @@ Promise API 并非完美无瑕。虽然 Promise Chain 让复杂的异步操作�
 
 人们对于 JavaScript 异步编程的探索仍在继续。自 async/await 被列入标准后，人们陆续又提出了诸如 Async Iteration 这些让编写异步代码更加方便的概念。
 
-![一个 Async Iteration 的用例，需要实现 Async Iterator 或 Async Generator](/images/uploads/async-js-3-12.png)
+<BlogImage filePath="async-js/async-js-3-12" alt="一个 Async Iteration 的用例，需要实现 Async Iterator 或 Async Generator" />
 
 ## 小结
 

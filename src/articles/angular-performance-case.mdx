@@ -1,6 +1,8 @@
-export const title = 'Angular经验分享：组件性能优化案例'
+import { BlogImage } from '../components/BlogImage'
+
+export const title = 'Angular 经验分享：组件性能优化案例'
 export const date = '2021-02-15T18:23:42.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = '通过一个简单的拖动分栏组件的性能问题，谈谈 Angular 前端 App 中的性能问题。'
 
 > 本文章由本人发表于：[https://www.yuque.com/matrix-blog/frontend/component-performance-case](https://www.yuque.com/matrix-blog/frontend/component-performance-case)
@@ -15,7 +17,7 @@ export const excerpt = '通过一个简单的拖动分栏组件的性能问题�
 
 在课程系统中，我们在一次迭代后，为那些需要编写程序代码的题目提供了一个新的、较为复杂的做题组件，它的样貌如下图所示：
 
-![](/images/uploads/angular-performance-case-1.png)
+<BlogImage filePath="angular-performance-case/1" />
 
 此做题组件左侧是一个 Tab 组件，显示题目信息、得分情况、排名、得分等信息，而右侧则是一个使用`monaco-editor`实现的代码编辑器。它们中间夹着一个分栏组件，用户可以通过鼠标拖动此分栏来调整左侧组件和右侧组件的宽度比例。
 
@@ -23,13 +25,13 @@ export const excerpt = '通过一个简单的拖动分栏组件的性能问题�
 
 下图是拖动分栏组件的效果，可以看到分栏组件不跟手，页面出现了明显的卡顿、掉帧。这些问题在一些低端的笔记本上更加严重。
 
-![](/images/uploads/angular-performance-case-2.gif)
+<BlogImage filePath="angular-performance-case/2" extension="gif" />
 
 ## 原因分析
 
 为什么拖动分栏会导致页面的 CPU 占用陡增呢？笔者首先使用了 Chrome DevTools 的 Performance 分析工具，分析了在拖动分栏组件过程中前端 App 的性能状况，得到了如下图所示的结果：
 
-![](/images/uploads/angular-performance-case-3.png)
+<BlogImage filePath="angular-performance-case/3" />
 
 仔细观察中间的 Main 栏目，可以看到下方的第一条横轴中有多个右上角含有红色三角形的灰色矩形。这里，第一条横轴的矩形从左到右表示随着时间推移，每个 Task 的用时。红色三角形则是 DevTools 给出的警告：此 Task 用时过长。笔者用鼠标指向了其中一个矩形，它对应的 Task 用时已经达到了惊人的 51.94ms！
 
@@ -37,11 +39,11 @@ export const excerpt = '通过一个简单的拖动分栏组件的性能问题�
 
 笔者之所以这样断定，是由于在浏览器中，我们有如下的特殊的进程模型（https://aerotwist.com/blog/the-anatomy-of-a-frame/）：
 
-![](/images/uploads/angular-performance-case-4.jpg)
+<BlogImage filePath="angular-performance-case/4" />
 
 现在，我们换一个角度，从浏览器如何产生每一帧入手。在一块使用了 60Hz 刷新率显示器的设备中，每隔一定时间，系统会给浏览器的 Renderer Process 发出一个 vsync 信号。其中的 Compositor Thread 会由此触发生成一帧的任务。而在 Main Thread 中，需要进行以下几步任务：
 
-![](/images/uploads/angular-performance-case-5.png)
+<BlogImage filePath="angular-performance-case/5" />
 
 大体上来说，在 Main Thread 中，浏览器主要经历了 JavaScript 执行、样式计算、Layout 计算、生成渲染数据的这几步。这几步的主要工作就如它们的名字，如果想要了解详细情况，请阅读文章[The Anatomy of a Frame](https://aerotwist.com/blog/the-anatomy-of-a-frame/)。
 
@@ -55,7 +57,7 @@ export const excerpt = '通过一个简单的拖动分栏组件的性能问题�
 
 接下来，我们回到性能分析结果，看看那些执行时间过长的 JavaScript 代码的调用栈，弄清楚它们到底在干什么。下图是生成单个帧的过程中发生的 Task 以及调用栈情况：
 
-![](/images/uploads/angular-performance-case-6.png)
+<BlogImage filePath="angular-performance-case/6" />
 
 这些 Task 的调用栈颇为壮观，但壮观归壮观，它们总共花费了将近 60ms，产生了严重的卡顿问题。仔细分析这些 Task，它们可以被分为三个部分。前面三个黄色的“Timer Fired”是做题组件使用的**三个** `perfect-scrollbar` 第三方组件通过 `setInterval` 定期检查 Layout 是否发生改变，进而修改自身的尺寸等属性。中间的黄色的“Event: mousemove”则是这次性能问题的主角，我们稍后再讨论。后面的“Animation Frame Fired”则是 `monaco-editor` 代码编辑器通过 `requestAnimationCallback` 给每一帧的生成挂上的钩子，用于检查并更新自身的 Layout，比如右边的滚动条的位置。
 
@@ -125,9 +127,9 @@ this.zone.runOutsideAngular(() => {
 
 经过上述两步的优化，在生成一帧期间运行的 JavaScript 代码数目大大减少了，从而在做题页面里拖动分栏组件已经能够稳定运行在 50fps 以上，上图是优化前的效果，下图是优化后的效果：
 
-![](/images/uploads/angular-performance-case-2.gif)
+<BlogImage filePath="angular-performance-case/2" extension="gif" />
 
-![](/images/uploads/angular-performance-case-7.gif)
+<BlogImage filePath="angular-performance-case/7" extension="gif" />
 
 注意右侧 `monaco-editor` 的滚动条，可以明显发现它适应最新的宽度好像有些迟滞，这是因为前面我们将它进行 Layout 运算的时间间隔扩大到了 600ms，其实这个间隔稍微有些长了，不过影响并不大。同时，由于避免了变更检测带来的大量不必要的模板运算，拖动分栏组件时 CPU 占用也大大降低了。
 

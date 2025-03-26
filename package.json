@@ -5,19 +5,22 @@
   "private": true,
   "scripts": {
     "dev": "waku dev",
-    "build": "waku build",
+    "build": "waku build --with-txiki",
     "start": "waku start",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "images": "tsx scripts/process-images.ts",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@giscus/react": "^3.1.0",
     "clsx": "^2.1.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-server-dom-webpack": "19.0.0",
     "rehype-pretty-code": "^0.14.0",
     "shiki": "^1.29.2",
-    "waku": "0.21.21"
+    "waku": "https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?0.21.24"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.3.0",
@@ -28,13 +31,17 @@
     "@tailwindcss/postcss": "^4.0.8",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.8",
+    "@txikijs/types": "^24.12.0",
     "@types/mdx": "^2.0.13",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "eslint": "^9.21.0",
+    "husky": "^9.1.7",
     "remark-gfm": "^4.0.1",
     "sass-embedded": "^1.85.0",
+    "sharp": "^0.33.5",
     "tailwindcss": "^4.0.8",
+    "tsx": "^4.19.3",
     "typescript": "5.7.3",
     "vite-plugin-static-copy": "^2.2.0",
     "vite-tsconfig-paths": "^5.1.4"

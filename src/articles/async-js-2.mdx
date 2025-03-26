@@ -1,6 +1,8 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '浅谈 JavaScript 异步编程（二）：JS 异步编程的基石'
 export const date = '2020-04-25T11:12:25.123Z'
-export const category = '前端修炼手册'
+export const category = 'web-frontend'
 export const excerpt = `
 JavaScript 作为一门单线程语言，如何安全地执行异步代码？本文将介绍事件循环与任务队列这一 JS 异步编程的基石，探讨它们如何让 JS 引擎与运行环境协调工作
 `
@@ -9,21 +11,19 @@ JavaScript 作为一门单线程语言，如何安全地执行异步代码？本
 
 我们再来看看刚才的这段代码，Node.js 在读取文件结束后将 Callback 交给 JS 引擎执行，但这其中有一个问题：运行环境交还 Callback 的时机如何确定？
 
-![](/images/uploads/async-js-2-1.png)
+<BlogImage filePath="async-js/async-js-2-1" alt="JS 引擎与运行环境角逐" />
 
 如果运行环境在任务结束时立刻将 Callback 交还引擎，而此时引擎很可能正在执行一个函数的中途，那么强行插入执行的 Callback 很可能会导致一些难以预料的后果。
 
 例如这段代码，setTimeout 是运行环境提供的一个定时器，我们这里将定时器设为 0，也就是说运行环境得到这个任务后可以立即完成。假如运行环境完成后立即塞回引擎执行，那么`counter is 0`既可能被打印一次，也可能被打印两次。
 
-![](/images/uploads/async-js-2-2.png)
-
-JS 作为一门单线程语言竟然会出现多线程并发问题！
+<BlogImage filePath="async-js/async-js-2-2" alt="JS 作为一门单线程语言竟然会出现多线程并发问题！" />
 
 ## 事件循环与任务队列
 
 幸运的是，上述的情况是不可能在 JS 中发生的。为了让引擎和运行环境在恰当的时间点交互，运行环境都采用了一套基于事件循环与任务队列的设计。
 
-![](/images/uploads/async-js-2-3.png)
+<BlogImage filePath="async-js/async-js-2-3" alt="事件循环与任务队列" />
 
 上图为浏览器中的事件循环与任务队列模型，它最初由 HTML5 标准制定，后来 ES6 标准又作出了修改。
 
@@ -32,7 +32,7 @@ JS 作为一门单线程语言竟然会出现多线程并发问题！
 
 下面我们通过一个具体的例子来理解这个模型：
 
-![](/images/uploads/async-js-2-4.gif)
+<BlogImage filePath="async-js/async-js-2-4" extension="gif" alt="事件循环与任务队列" />
 
 ## 小结
 
