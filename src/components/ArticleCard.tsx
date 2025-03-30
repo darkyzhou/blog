@@ -34,9 +34,9 @@ export function ArticleCard({ slug, category, title, date, excerpt }: ArticleCar
           {' '}
           {DATE_FORMAT.format(new Date(date))}
         </span>
-        <span className="text-carbongray-50 text-xl">
+        <h1 className="text-carbongray-50 text-xl">
           {title}
-        </span>
+        </h1>
       </div>
       <div className="hidden lg:flex col-span-1 text-carbongray-300 flex-col justify-end text-pretty text-sm">
         {excerpt}

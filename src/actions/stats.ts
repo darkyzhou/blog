@@ -13,7 +13,6 @@ export async function getStats() {
   }
 
   const { arch, platform, osRelease } = globalThis.tjs.system
-  const cpuSpeed = (theCpu.speed / 1000).toFixed(2)
   const version = globalThis.tjs.version
-  return `Powered by ${platform} ${osRelease} (${arch}), ${theCpu.model} @ ${cpuSpeed} GHz, Txiki.js v${version}`
+  return `Powered by NixOS (${platform} ${osRelease}, ${arch}), Loongson-2F @ 1.2 GHz, Txiki.js v${version}`
 }

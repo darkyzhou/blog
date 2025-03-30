@@ -1,31 +1,42 @@
+import { BlogImage } from '../components/BlogImage'
+
 export const title = '给飞腾 FT-2000/4 编译 NixOS'
 export const date = '2025-03-10T11:12:25.123Z'
 export const category = 'linux'
 export const excerpt = `
-TODO
-`
+飞腾 FT-2000/4 是一款国产的 ARM 架构的处理器，这篇文章会介绍我给它编译 NixOS 并将它作为我的软路由的过程
+`.trim()
 
-飞腾 FT-2000/4 是一款国产的 ARM 架构的处理器，我在闲鱼上淘到了一块 SV1-F2026c 主板。
+## 前言
 
-启动之后，发现使用的是百敖固件，且支持 UEFI。
+最近在闲鱼上淘到一块信步的 [SV1-F2026c 主板](https://seavo.com/products/products-info_itemid_362.html)，上面搭载了飞腾于 2019 年发布的 [FT-2000/4](https://www.phytium.com.cn/homepage/production/6/) 处理器。这款国产处理器搭载了「飞腾自主高能效处理器核 FTC663」，兼容 ARMv8 体系结构，名字中的 `/4` 表明它有 4 个核心。它还有一个近亲 [FT-2000+/64](https://www.phytium.com.cn/homepage/production/3/)，拥有 64 个核心。
 
-![image](/images/efi.jpg)
+这块主板成色很新，闻上去还有一股比较上头的那种 PCB 板特有的味道。它配备有足足 10 个 USB 接口，其中 8 个为 USB 3.0 接口。它还配备有两个千兆以太网口，根据「网口数量大于等于二时一律当作软路由」的金科玉律，我必须将它安装为软路由使用，在上面运行 DNS 服务器、DHCP 服务器等。
 
-之前移植 NixOS 到龙芯时遇到的两个阴间固件给我带来了很深的心理阴影。
+<BlogImage filePath="hardware/raven1" />
 
-根据 [NixOS on ARM/UEFI](https://nixos.wiki/wiki/NixOS_on_ARM/UEFI)，我从 Hydra 上下载了 NixOS 的 Arm 的 UEFI 镜像。
+由于 FT-2000/4 并不自带 GPU，所以我插了一块[摩尔线程 S30 显卡](https://www.mthreads.com/product/S10) 作为亮机卡。点亮之后，发现主板使用的是百敖固件且支持 UEFI，还有 PCIe 通道拆分功能。
 
-我将镜像存到了安装有 Ventoy 的 U 盘里，插上之后很顺利就进入了 Ventoy，并进入了 NixOS 的安装界面。整个安装过程非常顺利。
+<BlogImage filePath="compiling-nixos-for-ft2000/raven" />
+<BlogImage filePath="compiling-nixos-for-ft2000/efi" />
 
-中间存在一个插曲，在和网友聊天时，对方提到 FT-2000/4 的某些型号存在缺陷，写入 EFI Variable 时会损坏主板。
+支持 UEFI 意味着这张主板的装机过程应该会很简单，相比一些只能通过闭源 uBoot 固件启动的 ARM SoC 来说非常友好。不过，和朋友交流得知某些厂商的某些型号的主板存在缺陷：写入 UEFI 变量时会损坏主板，这让我放下的心又提了上来。我需要在安装 NixOS 期间确保它不会写入 UEFI 变量，而是依靠 UEFI 固件默认的行为去寻找启动分区来启动系统。
 
-上述的 NixOS 文章提到了一个类似的事情：
+接下来，我将介绍我给这块主板安装 NixOS 的具体过程，包括编译新内核来解决主板网口驱动缺失的问题。本文末尾总结了安装流程和相关代码，希望能对你有所帮助（真的有人会买这种主板吗）。
+
+## 安装过程
+
+根据 [NixOS on ARM/UEFI](https://nixos.wiki/wiki/NixOS_on_ARM/UEFI) 的指示，我从 Hydra 上下载了 NixOS 的 Arm 的 UEFI 镜像。然后，我将镜像存到了安装有 [Ventoy](https://www.ventoy.net/en/index.html) 的 U 盘里，插上主板并开机之后顺利进入 Ventoy，并启动了 NixOS 的安装界面。整个安装过程非常顺利。
+
+> Ventoy 是一个便捷的启动盘管理工具，安装到 U 盘之后，我们只需要往其中存入各种镜像文件，插上主机并开机之后就可以进入一个菜单，选择需要启动的镜像。在我的例子里，我在 U 盘里存入了各种 x86 架构的发行版镜像，以及 ARM 架构的 NixOS 的 UEFI 安装镜像。
+
+在安装 NixOS 时，我看到上述的 NixOS on ARM/UEFI 提到：
 
 > Know if your Platform Firmware's UEFI implementation has writable EFI vars. This is not true for all UEFI implementations on ARM, but is something to be mindful about. If it does not, boot.loader.efi.canTouchEfiVariables has to be set to false.
 
-本着不怕一万就怕万一的原则，我使用了文章里推荐的配置：
+为了避免写入主板的 UEFI 变量，我使用了文章里推荐的如下的配置。
 
-```plain
+```nix
 {
   boot.loader.grub.enable = true;
   boot.loader.grub.efiSupport = true;
@@ -34,195 +45,81 @@ TODO
 }
 ```
 
-准备执行 `nixos-install` 时，我才发现主板的网口不能正常工作，似乎是 Linux 没有网卡驱动。
+## 编译系统和方案对比
 
-```plain
-$ lspci -nnk
-00:00.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc16]
-	Kernel driver in use: pcieport
-00:01.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc08]
-	Kernel driver in use: pcieport
-00:02.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc01]
-	Kernel driver in use: pcieport
-00:03.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc16]
-	Kernel driver in use: pcieport
-00:04.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc08]
-	Kernel driver in use: pcieport
-00:05.0 PCI bridge [0604]: Cadence Design Systems, Inc. Device [17cd:dc01]
-	Kernel driver in use: pcieport
-01:00.0 VGA compatible controller [0300]: Moore Threads Technology Co.,Ltd MTT S30 [1ed5:0102]
-	Subsystem: Moore Threads Technology Co.,Ltd MTT S30 [1ed5:0102]
-01:00.1 Multimedia audio controller [0401]: Moore Threads Technology Co.,Ltd MTT HDMI/DP Audio [1ed5:01ff]
-	Subsystem: Moore Threads Technology Co.,Ltd MTT HDMI/DP Audio [1ed5:01ff]
-03:00.0 USB controller [0c03]: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller [1912:0014] (rev 03)
-	Kernel driver in use: xhci-pci-renesas
-	Kernel modules: xhci_pci_renesas
-05:00.0 SATA controller [0106]: ASMedia Technology Inc. ASM1064 Serial ATA Controller [1b21:1064] (rev 02)
-	DeviceName: USB
-	Subsystem: ZyDAS Technology Corp. Device [2116:2116]
-	Kernel driver in use: ahci
-06:00.0 USB controller [0c03]: Renesas Electronics Corp. uPD720201 USB 3.0 Host Controller [1912:0014] (rev 03)
-	Kernel driver in use: xhci-pci-renesas
-	Kernel modules: xhci_pci_renesas
-```
+启动安装好的系统之后，我发现主板的网口不能正常工作。观察 `ip link` 的输出，发现其中并没有主板上的网卡设备。似乎是 NixOS 使用的主线内核没有包含 FT-2000/4 的网卡驱动。
 
-查阅网络资料，发现是飞腾大量的硬件驱动至今都没有进入 Linux 主线。
+> 与我们在 x86 架构的主机下常用的网卡不同，大多数 ARM 设备的网卡被实现在了 SoC 内部，而不是作为独立的设备通过 PCIe 连接到 CPU 或南桥。
+> 
+> 我这块主板提供的两个千兆以太网口实际上都是分别通过一块 [RTL8211F](https://www.realtek.com/Product/Index?id=3975&cate_id=786) 芯片作为 PHY 连接到 SoC 内部的 MAC 上实现的。根据 [OSI 模型](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi)，PHY 位于最底部的物理层，负责接收和发送物理信号；而 MAC 位于倒数第二的链路层，负责数据帧的处理。二者共同配合完成底层的网络通信功能。
 
-> 这也是国内信创产业的一大痛点。厂商只知道闭门造车，支持少数几个 LTS。
+查阅网络资料发现，飞腾大量的硬件驱动至今都没有进入 Linux 内核主线，所以我们所安装的 NixOS 使用的内核自然是缺少这些驱动的。我们需要找到这些驱动的源代码，并尝试在尽可能新的 Linux 内核上编译它们。
 
-下面是 `fastfetch` 的截图：
+> 我认为，缺乏上游化是国内信创产业之于像我这样的个人开发者的一大痛点。不少厂商们一直在「闭门造车」：在老旧版本的 Linux 内核上添加闭源驱动，在不提供相关源码的同时只给少数几家发行版合作伙伴提供软件支持。这导致这些信创硬件和特定的软件高度捆绑，整个生态相当封闭，个人开发者很难参与其中。
+>
+> 这里的情况有些类似于《曹刿论战》，不少相关人士倾向于对个人开发者持「又何间焉」的态度。虽然我认为自己的水平不足以自诩为曹刿，但我仍然想反驳说「肉食者鄙，未能远谋」。至少，个人开发者除了能对开发作出一点贡献，还能给相关的源码发挥监督作用，从而不至于让一些粗心大意的厂商开发者引入低级的错误，甚至是安全漏洞。
 
-![fastfetch](/images/fastfetch.png)
-
-
-
-
-
-
-https://discourse.nixos.org/t/remote-cross-compiled-builds-for-macos-darwin-from-nixos-remote/5963
-
-https://nixos-and-flakes.thiscute.world/development/cross-platform-compilation
-
-https://nixos.org/manual/nixpkgs/stable/#chap-cross
-
-https://ayats.org/blog/nix-cross
-
-
-
-编译过程中遇到了下面的报错：
-
-```plain
-Running phase: unpackPhase
-@nix { "action": "setPhase", "phase": "unpackPhase" }
-unpacking source archive /nix/store/jyyiymaxx89bpyvkaaziqq00pl0i99yb-XML-SAX-1.02.tar.gz
-source root is XML-SAX-1.02
-setting SOURCE_DATE_EPOCH to timestamp 1560478357 of file "XML-SAX-1.02/MANIFEST"
-Running phase: patchPhase
-@nix { "action": "setPhase", "phase": "patchPhase" }
-Running phase: updateAutotoolsGnuConfigScriptsPhase
-@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
-Running phase: updateAutotoolsGnuConfigScriptsPhase
-@nix { "action": "setPhase", "phase": "updateAutotoolsGnuConfigScriptsPhase" }
-Running phase: configurePhase
-@nix { "action": "setPhase", "phase": "configurePhase" }
-Checking if your kit is complete...
-Looks good
-Generating a Unix-style Makefile
-Writing Makefile for XML::SAX
-no configure script, doing nothing
-Running phase: buildPhase
-@nix { "action": "setPhase", "phase": "buildPhase" }
-build flags: SHELL=/nix/store/11ciq72n4fdv8rw6wgjgasfv4mjs1jrw-bash-5.2p37/bin/bash
-cp lib/XML/SAX/ParserFactory.pm blib/lib/XML/SAX/ParserFactory.pm
-cp lib/XML/SAX/PurePerl/UnicodeExt.pm blib/lib/XML/SAX/PurePerl/UnicodeExt.pm
-cp lib/XML/SAX/PurePerl/DTDDecls.pm blib/lib/XML/SAX/PurePerl/DTDDecls.pm
-cp lib/XML/SAX/PurePerl/Reader/URI.pm blib/lib/XML/SAX/PurePerl/Reader/URI.pm
-cp lib/XML/SAX.pm blib/lib/XML/SAX.pm
-cp lib/XML/SAX/PurePerl/XMLDecl.pm blib/lib/XML/SAX/PurePerl/XMLDecl.pm
-cp lib/XML/SAX/DocumentLocator.pm blib/lib/XML/SAX/DocumentLocator.pm
-cp lib/XML/SAX/PurePerl/Reader/Stream.pm blib/lib/XML/SAX/PurePerl/Reader/Stream.pm
-cp lib/XML/SAX/PurePerl/Reader/UnicodeExt.pm blib/lib/XML/SAX/PurePerl/Reader/UnicodeExt.pm
-cp lib/XML/SAX/Intro.pod blib/lib/XML/SAX/Intro.pod
-cp lib/XML/SAX/PurePerl/DocType.pm blib/lib/XML/SAX/PurePerl/DocType.pm
-cp lib/XML/SAX/PurePerl/Reader.pm blib/lib/XML/SAX/PurePerl/Reader.pm
-cp lib/XML/SAX/PurePerl/Productions.pm blib/lib/XML/SAX/PurePerl/Productions.pm
-cp lib/XML/SAX/PurePerl/DebugHandler.pm blib/lib/XML/SAX/PurePerl/DebugHandler.pm
-cp lib/XML/SAX/PurePerl/Exception.pm blib/lib/XML/SAX/PurePerl/Exception.pm
-cp lib/XML/SAX/PurePerl/Reader/NoUnicodeExt.pm blib/lib/XML/SAX/PurePerl/Reader/NoUnicodeExt.pm
-cp lib/XML/SAX/PurePerl/EncodingDetect.pm blib/lib/XML/SAX/PurePerl/EncodingDetect.pm
-cp lib/XML/SAX/PurePerl/NoUnicodeExt.pm blib/lib/XML/SAX/PurePerl/NoUnicodeExt.pm
-cp lib/XML/SAX/PurePerl/Reader/String.pm blib/lib/XML/SAX/PurePerl/Reader/String.pm
-cp lib/XML/SAX/PurePerl.pm blib/lib/XML/SAX/PurePerl.pm
-Manifying 6 pod documents
-Running phase: installPhase
-@nix { "action": "setPhase", "phase": "installPhase" }
-install flags: SHELL=/nix/store/11ciq72n4fdv8rw6wgjgasfv4mjs1jrw-bash-5.2p37/bin/bash pkgconfigdir=/nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/pkgconfig m4datadir=/nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/aclocal aclocaldir=/nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/aclocal install
-Manifying 6 pod documents
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/DocumentLocator.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/Intro.pod
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/ParserFactory.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Exception.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/XMLDecl.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Productions.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/EncodingDetect.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/DocType.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/UnicodeExt.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/DebugHandler.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/DTDDecls.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/NoUnicodeExt.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader/Stream.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader/String.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader/UnicodeExt.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader/NoUnicodeExt.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/XML/SAX/PurePerl/Reader/URI.pm
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX.3
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX::PurePerl.3
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX::Intro.3
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX::DocumentLocator.3
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX::PurePerl::Reader.3
-Installing /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/share/man/man3/XML::SAX::ParserFactory.3
-Appending installation info to /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/5.40.0/aarch64-linux/perllocal.pod
-Can't locate XML/SAX.pm in @INC (you may need to install the XML::SAX module) (@INC entries checked: /nix/store/l7j4aj8lnbrq8d18w1lkkgdmm5hdb6a0-perl-aarch64-unknown-linux-gnu-5.40.0-mini/lib/perl5/cross_perl/5.40.0 /nix/store/71jszfi28mb02wx5542cj62rqmx701cy-perl-aarch64-unknown-linux-gnu-5.40.0/lib/perl5/5.40.0 /nix/store/71jszfi28mb02wx5542cj62rqmx701cy-perl-aarch64-unknown-linux-gnu-5.40.0/lib/perl5/5.40.0/aarch64-linux /nix/store/71jszfi28mb02wx5542cj62rqmx701cy-perl-aarch64-unknown-linux-gnu-5.40.0/lib/perl5/site_perl/5.40.0 /nix/store/71jszfi28mb02wx5542cj62rqmx701cy-perl-aarch64-unknown-linux-gnu-5.40.0/lib/perl5/site_perl/5.40.0/aarch64-linux /nix/store/zqrn8zmmlrhal5hz1yfblryps34nfpak-perl5.40.0-XML-NamespaceSupport-1.12-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0 /nix/store/zqrn8zmmlrhal5hz1yfblryps34nfpak-perl5.40.0-XML-NamespaceSupport-1.12-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/aarch64-linux /nix/store/2ncp24w91y21s6iljfxj0fwg1l3jrayi-perl5.40.0-XML-SAX-Base-1.09-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0 /nix/store/2ncp24w91y21s6iljfxj0fwg1l3jrayi-perl5.40.0-XML-SAX-Base-1.09-aarch64-unknown-linux-gnu/lib/perl5/site_perl/5.40.0/aarch64-linux /nix/store/7anbbkg3849y60l1avqh1xvizf5cxqbi-perl5.40.0-XML-SAX-1.02-aarch64-unknown-linux-gnu/lib/perl5/site_perl .).
-BEGIN failed--compilation aborted.
-make: *** [Makefile:743: install_sax_pureperl] Error 2
-```
-
-搜索了一下，发现已经有 https://github.com/NixOS/nixpkgs/issues/330308 这个 issue 了。
-
-通过 `nix-store -q --referrers` 调查是谁引入了这个包。最终定位到是 https://github.com/NixOS/nixpkgs/blob/4a6505819667d4573c9891e140d519929daad49c/nixos/modules/system/boot/loader/grub/grub.nix#L738
+幸运的是，[AOSC 的内核补丁集](https://github.com/AOSC-Dev/aosc-os-abbs/blob/87b5135ef2c8ad508462e87b0bdcd431d2a65976/runtime-kernel/linux-kernel/spec)包含了飞腾 FT-2000/4 所需的各类驱动，并且 AOSC 的内核开发者们在持续维护着这些补丁，不断跟进最新的内核版本，向他们致敬。在 Nix 中，我可以通过下面的代码来声明一个打上了这些补丁的内核：
 
 ```nix
-system.build.installBootLoader =
-  let
-    install-grub-pl = pkgs.replaceVars ./install-grub.pl {
-      utillinux = pkgs.util-linux;
-      btrfsprogs = pkgs.btrfs-progs;
-      inherit (config.system.nixos) distroName;
-      # targets of a replacement in code
-      bootPath = null;
-      bootRoot = null;
-    };
-    # 这里引入了 XML::SAX 包
-    perl = pkgs.perl.withPackages (p: with p; [
-      FileSlurp FileCopyRecursive
-      XMLLibXML XMLSAX XMLSAXBase
-      ListCompare JSON
-    ]);
-  in pkgs.writeScript "install-grub.sh" (''
-  #!${pkgs.runtimeShell}
-  set -e
-  ${optionalString cfg.enableCryptodisk "export GRUB_ENABLE_CRYPTODISK=y"}
-'' + flip concatMapStrings cfg.mirroredBoots (args: ''
-  ${perl}/bin/perl ${install-grub-pl} ${grubConfig args} $@
-'') + cfg.extraInstallCommands);
+{ lib, fetchurl, linuxManualConfig, pkgs, ... }:
+let
+  version = "6.13.3";
+  read-linux-config =
+    pkgs.callPackage ../../../shared/read-linux-config.nix { };
+
+  # 这个参数避免了编译报错，参见下文
+  stdenv = pkgs.impureUseNativeOptimizations (pkgs.stdenv);
+in (linuxManualConfig {
+  inherit version stdenv;
+  modDirVersion = "${version}-aosc-main";
+
+  # 从 cdn.kernel.org 下载内核源码
+  src = fetchurl {
+    url =
+      "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${version}.tar.xz";
+    sha256 = "sha256-2jP7Fe0mKKqqi3hwtfKd7HlLITSm2lIIFJ0OFOPKwCw=";
+  };
+  extraMakeFlags = [ "V=2" ];
+  
+  # 声明补丁列表，取自 AOSC 的内核补丁集
+  kernelPatches =
+    let
+      patchFiles = lib.filesystem.listFilesRecursive ./patches;
+      makePatch = file: {
+        name = lib.removePrefix (toString ./patches + "/") (toString file);
+        patch = file;
+      };
+    in
+    map makePatch patchFiles;
+  
+  # 声明内核配置文件，取自 AOSC 的内核配置
+  configfile = ./config;
+  config = read-linux-config ./config;
+})
 ```
 
-奇怪的是，检查 `install-grub-pl` 指向的 Perl 脚本，它并没有真的引入 `XML::SAX` 包。
+接下来我们面临一个问题：如何编译这个内核？我们其实有三个方式：
 
-现在我有这些选择：
+- **在性能强劲的 amd64 主机上使用交叉编译**
 
-- 放弃使用 Grub，使用 systemd-boot
-- 尝试覆盖 `install-grub-pl` 脚本，去掉对 `XML::SAX` 的依赖
-- 尝试修复原始问题
+  所谓交叉编译，指的是让编译器在一种架构的机器上编译另一种架构的机器的程序。[这会导致 Nix 无法利用官方的编译缓存](https://nixos-and-flakes.thiscute.world/development/cross-platform-compilation)，需要重新下载几乎包括上述内核在内整个系统各个组成部分的源码并进行编译，总共花费的时间不见得会很短。
 
-其实编译进程能到 grub 这一步，说明 Linux 内核的编译已经完成了（我认为 grub 的编译依赖于内核的编译），我距离成功只有一步之遥。
+- **在性能强劲的 amd64 主机上使用 QEMU 模拟原生编译**
 
-> 奇怪的是，为什么之前本地编译的时候没有遇到这个问题？
+  这虽然能够利用 NixOS 官方的编译缓存，但在 QEMU 上编译 Linux 内核的效率只能说非常低。QEMU 模拟器追求的是模拟的正确性，而不是性能。
 
-我发现 `nix build nixpkgs#pkgs.perl540Packages.XMLSAX` 可以正常编译，但是 `nix build nixpkgs#legacyPackages.x86_64-linux.pkgsCross.aarch64-multiplatform.perl540Packages.XMLSAX` 会出现上述错误。
+- **在飞腾 FT-2000/4 上进行原生编译**
 
+  从 sbc-bench 的[测试结果](https://github.com/ThomasKaiser/sbc-bench/blob/master/Results.md)来看，FT-2000/4 的 7zip 解压缩性能竟然还算不错，和隔壁家的龙芯 3A5000 以及瑞芯微 RK3582（双核 A76 + 四核 A55）不相上下。7z 解压缩测试相当考验 CPU 的运算和内存带宽，应该也能在不小的程度上反映出编译的效率。
+  
+我最终依次尝试了上述三种方式。在第一种方式中，我遇到了[神秘的编译报错](https://github.com/NixOS/nixpkgs/issues/330308)，这个报错似乎只在交叉编译时出现。
 
+对于第二种方式，我在编译开始长达 5 小时之后彻底对 QEMU 失去了信心。要知道，我的这台 amd64 主机的 CPU 是[拥有高达 20 线程的 i7-12700T](/hardware)，理论上原生编译 Linux 内核的时间不会超过 10 分钟。我最终放弃了这种方式。
 
+## 原生编译的排错过程
 
-
-
-
-
-
-> 中间有个小插曲，报错发生时，我往前翻了半天也没有找到报错，以为是什么特殊的错误。结果真正的报错在两千多行之前。
+选择第三个方案，在 FT-2000/4 上进行原生编译之后，我很快遇到了下面编译报错。从日志来看，编译器认为我们当前选定的 CPU 不支持 `aese` 和 `aesmc` 等来自 [NEON 指令集](https://arc.net/l/quote/xwpuwkct)的指令。
 
 ```plain
 /build/ccpPlRSz.s: Assembler messages:
@@ -248,7 +145,47 @@ make[1]: *** [/build/linux-6.13.3/Makefile:1989: .] Error 2
 make: *** [/build/linux-6.13.3/Makefile:251: __sub-make] Error 2
 ```
 
+> 这里还有个小插曲：报错发生时，我往前翻编译日志翻了半天也没有找到具体的报错信息，以为碰到了灵异现象。结果在朋友的提示下，发现真正的报错信息出现在编译日志最后一行的两千多行之前。
+> 
+> 其实在使用像 Nix 这样支持多线程的编译系统时，一定要意识到：系统往往会同时运行多个独立的编译任务，有时一个任务编译失败并不会导致系统马上终止，而是会等到其它正在运行的编译任务完成之后再终止。这就导致出错的任务的日志往往被淹没在其它任务后来输出的日志中。
+
+对于这个报错，我的第一感受是懵逼的，因为根据[维基百科](https://arc.net/l/quote/xicvxyca)：
+
+> Armv8-A (often called ARMv8 while the Armv8-R is also available) represents a fundamental change to the ARM architecture.
+> ...
+> To both AArch32 and AArch64, Armv8-A makes VFPv3/v4 and advanced SIMD (Neon) standard.
+
+既然 FT-2000/4 宣称兼容 ARMv8 体系架构（一般指代 ARMv8-A 架构），那么它理应支持 NEON 指令集。那么问题可能出在 Nix 给 GCC 配置的 `-march` 参数，这个参数指定了 GCC 在处理汇编代码时能够使用的指令。我们可以通过下面的方法查询目前 FT-2000/4 主机的 GCC 参数：
+
+```plain
+$ nix repl
+Nix 2.24.12
+Type :? for help.
+nix-repl> :l <nixpkgs>
+...
+nix-repl> stdenv.hostPlatform.gcc     
+{ arch = "armv8-a"; }
 ```
+
+> 在 Nix 中，`stdenv` 是一个包含了标准构建环境的属性集，其中 `hostPlatform` 包含了当前主机的目标平台的信息，比如架构名、gcc 参数、内核参数等。Nix 会使用这些信息来配置编译器等设施。
+
+从这里可以看出，NixOS 默认给 GCC 配置了 `-march=armv8-a` 参数，看上去没有问题……吗？仔细阅读 [GCC 的文档](https://arc.net/l/quote/feffmtjb)：
+
+> Many of the architectures support extensions. These can be added by appending ‘+extension’ to the architecture name. Extension options are processed in order and capabilities accumulate. An extension will also enable any necessary base extensions upon which it depends. For example, the ‘+crypto’ extension will always enable the ‘+simd’ extension. The exception to the additive construction is for extensions that are prefixed with ‘+no…’: these extensions disable the specified option and any other extensions that may depend on the presence of that extension.
+
+也就是说，虽然在 ARMv8 架构中 NEON 指令集是必要组成部分（我们应该找不到不支持 NEON 指令集的 ARMv8 设备），但 GCC 仍然把它们拆成了两个配置项。所以理论上我们只需要给 GCC 配置 `-march=armv8-a+neon` 参数即可解决问题，这里 `neon` 和 `simd` 都指代 NEON 指令集。不过，我在这里更倾向使用 `-march=native` 参数，因为我期望这个参数能让 GCC 根据 FT-2000/4 的情况选择最优的指令和优化策略，*或许*能给内核带来一些性能提升。
+
+在 Nix 中，可以通过下面的方式给 `stdenv` 配置 `-march=native` 参数。需要注意的是这个参数破坏了 Nix 的纯净性，因为编译的产物会依赖于当前主机的架构，换个主机编译可能就会产生不同的结果（在某些极端情况下，甚至会产生编译报错）。Nix 的纯洁性要求同一份配置文件在不同的主机上编译出的结果是一样的，不过由于我很确定这个配置不会在别的主机上使用，所以……对不起啦，Nix。
+
+```nix
+{
+  stdenv = pkgs.impureUseNativeOptimizations (pkgs.stdenv);
+}
+```
+
+之后，我们重新编译内核，这次编译持续的时间更长了，但……又遇到了新的报错：
+
+```plain
 ../drivers/gpu/drm/radeon/radeon_ring.c: In function 'radeon_ring_commit':
 ../drivers/gpu/drm/radeon/radeon_ring.c:188:9: error: implicit declaration of function 'mmiowb' [-Wimplicit-function-declaration]
   188 |         mmiowb(); /* Make sure wptr is up-to-date for hw */
@@ -260,11 +197,15 @@ make[3]: *** [../scripts/Makefile.build:442: drivers/gpu] Error 2
 make[3]: *** Waiting for unfinished jobs....
 ```
 
-## 第三次失败
+这里的报错说 GCC 找不到 `mmiowb` 这个函数，而且错误发生在 AMD 的显卡 DRM 驱动中。我觉得 Linux 源码不至于出现这种低级错误，尤其是 ARMv8 是个相当流行的架构。
 
-这次的编译已经能顺利完成 build 阶段，不过终究还是倒在了 install 阶段（摊手）。
+经过调查，我发现 Linux 上游源码中并不存在这处函数调用，它是 AOSC 的补丁集引入的，用于修复其在龙架构下的某个问题。因此，这个 `mmiowb` 函数实际上是在龙架构下才会被定义。看来，我在不加分辨地引入 AOSC 的补丁集时，粗心大意地忽略了有些补丁是仅限龙架构使用的这一事实。
 
-> 从下面的日志也可以看到，FT-2000/4 总共花了四个半小时完整编译内核。作为不太恰当的对比，AMD Ryzen 5700X 在编译类似配置下的内核时花费了不到半小时。
+> 这里稍微辩解一下，其实这也不能完全怪我。AOSC 的开发者们当时是通过特殊的文件名后缀来区分仅限龙架构的补丁和通用补丁的。但是，这些补丁文件的名字都很长，我在 IDE 的文件列表中只能看到文件名的前半部分。
+
+去掉这些补丁后，编译得以走得更远，这次的编译已经能顺利完成 build 阶段，不过终究还是倒在了 install 阶段（摊手）。
+
+> 在 Linux 等项目的语境中，build 阶段指的是编译阶段，而 install 阶段指的是安装阶段，后者会将前者产生的各种文件复制到系统中的指定位置。
 
 ```plain
 ...
@@ -283,11 +224,11 @@ make[1]: *** Waiting for unfinished jobs....
 ...
 ```
 
+> 从日志也可以看到，FT-2000/4 总共花了四个半小时来编译内核。作为对比，AOSC 的某台搭载 AMD Ryzen 5700X 的构建主机在编译类似配置下的内核时花费了不到半小时。
+
 从报错信息看，内核的 Makefile 发现待安装的 `vmlinuz.efi` 文件不存在，而这应该是编译出来的 Linux 内核本身。本该生成的内核文件不存在，那前面几个小时到底编译了个什么？
 
-> 在 Makefile 的语境中，install 指的是将编译好的文件复制到系统中的指定位置的过程。这通常是构建过程的最后一步，在编译（build）阶段完成后执行。install 阶段会将编译生成的二进制文件、库文件、头文件、配置文件等放置到它们最终应该存在的目录中，使得软件可以被系统或用户使用。
-
-事实上，这里的问题是我们前面编译出来的内核文件并不是 `vmlinuz.efi` 而是 `Image`，而内核的 Makefile 因为我们错误的内核配置，认为内核文件应该是前者。要讲清楚缘由，我们得先弄清楚 Linux 中「编译出来的 Linux 内核」实际上依据架构的差异，至少存在下面的形式：
+事实上，这里的问题是我们前面编译出来的内核文件并不是 `vmlinuz.efi` 而是 `Image`，而内核的 Makefile 因为我们错误的内核配置，认为内核文件应该是前者。要讲清楚缘由，我们得先弄清楚：在 Linux 的世界中「编译出来的 Linux 内核」，依据架构的差异，至少存在下面的形式：
 
 - `vmlinux`: 未压缩的内核文件（ELF 格式）
 - `Image`: 纯二进制格式的内核映像，未压缩
@@ -296,32 +237,35 @@ make[1]: *** Waiting for unfinished jobs....
 - `uImage`: U-Boot 专用格式的内核映像
 - `vmlinuz.efi`: 一种特殊格式的内核映像文件，专为 UEFI 启动环境设计
 
-注意到报错日志中提到的 `You need to run "make" before "make install"`，这暗含我们在 build 阶段构建出来的「形式」应该和 install 阶段期待的「形式」保持一致。换句话说，我们的 Nix 编译配置在 build 阶段（即 `make`）和 install 阶段（即 `make install`）没有传入相对应的 target 名称。
+注意到报错日志中提到的 `You need to run "make" before "make install"`，这暗含我们在 build 阶段构建出来的「形式」应该和 install 阶段期待的「形式」保持一致。换句话说，我们的 Nix 编译配置在 build 阶段（即 `make`）和 install 阶段（即 `make install`）传入的 target 名称并不相互对应。
 
 我们看一下 nixpkgs 仓库里的 `pkgs/os-specific/linux/kernel/manual-config.nix`，它是我们使用的`linuxManualConfig` 函数的源码所在:
 
 ```nix
-# ...
+{
+  # ... 省略
   buildFlags = [
     "KBUILD_BUILD_VERSION=1-NixOS"
     kernelConf.target
-    "vmlinux"  # for "perf" and things like that
+    "vmlinux"
   ] ++ optional isModular "modules"
     ++ optionals buildDTBs ["dtbs" "DTC_FLAGS=-@"]
   ++ extraMakeFlags;
-# ...
+  # ... 省略
   installTargets = [
     (kernelConf.installTarget or (
+      # 看上去这里判断了我们所说的对应关系
       /**/ if kernelConf.target == "uImage" && stdenv.hostPlatform.linuxArch == "arm" then "uinstall"
       else if kernelConf.target == "zImage" || kernelConf.target == "Image.gz" || kernelConf.target == "vmlinuz.efi" then "zinstall"
       else "install"))
   ];
-# ...
+  # ... 省略
+}
 ```
 
 好吧，看上去它确实考虑到了二者的对应关系，它会依据传入 build 阶段的 `kernelConf.target` 的不同决定相应的 install 阶段的入参。那会不会是它这个对应关系有问题呢？我需要先弄清楚 `kernelConf.target` 具体的值是什么。从源码看，它取的值来自 `stdenv.hostPlatform.linux-kernel.target`。
 
-在 Nixpkgs 中，`stdenv` 是一个包含了标准构建环境的属性集，其中 `hostPlatform` 包含了当前主机的目标平台的信息，比如架构名、gcc 参数、内核参数等。`linuxManualConfig` 使用其中的 `linux-kernel.target` 大概是因为需要确保编译出来的内核的「形式」和当前主机正在用的内核「形式」一样。为了得到它的具体值，我们可以使用 `nix repl` 工具运行这个表达式。
+`linuxManualConfig` 使用其中的 `linux-kernel.target` 大概是因为需要确保编译出来的内核的「形式」和当前主机正在用的内核「形式」一样。为了得到它的具体值，我们可以使用 `nix repl` 工具运行这个表达式。
 
 ```plain
 $ nix repl
@@ -342,7 +286,7 @@ nix-repl> stdenv.hostPlatform.linux-kernel
 }
 ```
 
-可以看到，我们的 FT-2000/4 主机使用的 `target` 是 `Image`。也就是说，我们实际编译出来的内核文件的形式应该是纯二进制格式的映像。这一点可以从失败的 Nix 构建对应的临时文件夹看出来：
+可以看到，我们的 FT-2000/4 主机当前使用的 `target` 是 `Image`。因此，我们编译出来的内核文件的形式应该是纯二进制格式的映像。这一点可以从失败的 Nix 构建对应的临时文件夹看出来：
 
 ```
 $ cd /tmp/nix-build-linux-6.13.3.drv-3/build/linux-6.13.3/build/arch/arm64/boot
@@ -354,7 +298,7 @@ Image: Linux kernel ARM64 boot executable Image, little-endian, 4K pages
 
 > 在构建时，传入 `--keep-failed` 参数可以让 Nix 保存失败的构建的文件现场，方便我们调试。
 
-回到上面的 `linuxManualConfig` 函数，我们最终传入 install 阶段的入参是 `install`，但是诡异的是 Makefile 仍然选择去寻找 `vmlinuz.efi` 文件而不是 `Image` 文件。让我们看看 `arch/arm64/Makefile` 的源码：
+根据上面贴出的 `linuxManualConfig` 函数源码，我们最终传入 install 阶段的入参是 `install`，诡异的是 Linux 内核的 Makefile 仍然选择去寻找 `vmlinuz.efi` 文件而不是 `Image` 文件。让我们看看 Linux 内核的 `arch/arm64/Makefile` 的源码：
 
 ```makefile
 BOOT_TARGETS := Image vmlinuz.efi image.fit
@@ -384,7 +328,9 @@ endif
 
 可以看到，在 `linuxManualConfig` 中提到的 `Image` 对应的 `install` 和 `vmlinuz.efi` 对应的 `zinstall`，它们其实是同一个命令（好坑爹）。而这个 Makefile 最终会去寻找的内核文件名是通过 `DEFAULT_KBUILD_IMAGE` 去指定的，它的取值跟内核配置 `.config` 里的 `CONFIG_COMPRESSED_INSTALL` 有关，只有当这个选项没有被打开时它才会去找 `Image` 文件。
 
-至此真相大白了，我无脑拷贝的来自 AOSC 的内核配置中打开了 `CONFIG_COMPRESSED_INSTALL`，因为在 AOSC 里他们可能就是使用 `vmlinuz.efi` 或者 `Image.gz` 的，和 NixOS 不一样。我们可以在 FT-2000/4 主机上验证 NixOS 官方的内核是否确实关闭了这个选项：
+至此真相大白了，我无脑拷贝的来自 AOSC 的内核配置中打开了 `CONFIG_COMPRESSED_INSTALL`，因为在 AOSC 里他们可能就是使用 `vmlinuz.efi` 或者 `Image.gz` 的，和 NixOS 不一样。我们可以在当前的 FT-2000/4 主机上验证 NixOS 官方的内核是否确实关闭了这个选项：
+
+> `/proc/config.gz` 文件承载了当前系统运行的内核在编译时的配置。
 
 ```
 $ zgrep CONFIG_COMPRESSED_INSTALL /proc/config.gz
@@ -392,4 +338,62 @@ $ zgrep CONFIG_COMPRESSED_INSTALL /proc/config.gz
 # CONFIG_COMPRESSED_INSTALL is not set
 ```
 
-> `/proc/config.gz` 文件承载了当前系统运行的内核在编译时的配置。
+在修改内核配置后，我们重新编译内核，这次编译总算成功完成了。
+
+## 验证效果
+
+在新内核安装完成后，我重启了系统。Linux 内核总算成功驱动了 FT-2000/4 的两张网卡，我总算能用它来当软路由了。下面是 `fastfetch` 的输出：
+
+<BlogImage filePath="compiling-nixos-for-ft2000/fastfetch" />
+
+最后，我发现 SV1-F2026c 主板上的 3 个 COM 接口未能被内核识别，根据[信步官网](https://seavo.com/support/downloads-info_itemid_362.html)，似乎需要下载驱动源码进行编译。由于暂时用不到这几个接口（我自己有 USB 转串口模块），我没有继续深究了。
+
+## 流程总结
+
+这里总结一下本次在 FT-2000/4 上安装 NixOS 的流程：
+
+1. 使用 NixOS 官方的 ARM64 镜像安装系统，在运行 `nixos-install` 前，确保编辑 `configuration.nix` 文件，添加如下配置：
+
+    ```nix
+    {
+      boot.loader.grub.enable = true;
+      boot.loader.grub.efiSupport = true;
+      boot.loader.grub.efiInstallAsRemovable = true;
+      boot.loader.grub.device = "nodev";
+    }
+    ```
+
+2. 从 [AOSC 的仓库](https://github.com/AOSC-Dev/aosc-os-abbs/blob/87b5135ef2c8ad508462e87b0bdcd431d2a65976/runtime-kernel/linux-kernel) 获取内核配置和补丁集。
+  
+    它们分别位于 `autobuild/arm64/config` 和 `autobuild/patches` 目录下。注意去除后缀名不为 `.patch` 的补丁，例如 `xxx.patch.loongarch64` 这样的补丁。
+
+3. 修改内核配置，关闭 `CONFIG_COMPRESSED_INSTALL` 选项。
+4. 参考下面的 Nix 配置声明内核，注意 `impureUseNativeOptimizations` 参数。
+
+    ```nix
+    { lib, fetchurl, linuxManualConfig, pkgs, ... }:
+    let
+      version = "6.13.3";
+      read-linux-config =
+        pkgs.callPackage ../../../shared/read-linux-config.nix { };
+      stdenv = pkgs.impureUseNativeOptimizations (pkgs.stdenv);
+    in (linuxManualConfig {
+      inherit version stdenv;
+      modDirVersion = "${version}-aosc-main";
+      src = fetchurl {
+        url =
+          "https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-${version}.tar.xz";
+        sha256 = "sha256-2jP7Fe0mKKqqi3hwtfKd7HlLITSm2lIIFJ0OFOPKwCw=";
+      };
+      extraMakeFlags = [ "V=2" ];
+      kernelPatches = let
+        patchFiles = lib.filesystem.listFilesRecursive ./patches;
+        makePatch = file: {
+          name = lib.removePrefix (toString ./patches + "/") (toString file);
+          patch = file;
+        };
+      in map makePatch patchFiles;
+      configfile = ./config;
+      config = read-linux-config ./config;
+    })
+    ```

@@ -8,18 +8,18 @@ const ASSETS_DIR = path.join(cwd(), 'public/assets')
 const SUPPORTED_EXTENSIONS = ['.png', '.jpeg', '.jpg', '.webp']
 
 async function processImages() {
-  console.log('Processing images in public/assets directory...')
+  console.log('Processing images in public/assets/* directory...')
 
-  const processDirectory = async (directory: string) => {
+  const processDirectory = async (directory: string, ignoreFiles: boolean) => {
     const entries = fs.readdirSync(directory, { withFileTypes: true })
 
     for (const entry of entries) {
       const fullPath = path.join(directory, entry.name)
 
       if (entry.isDirectory()) {
-        await processDirectory(fullPath)
+        await processDirectory(fullPath, false)
       }
-      else if (entry.isFile()) {
+      else if (entry.isFile() && !ignoreFiles) {
         const ext = path.extname(entry.name).toLowerCase()
         if (SUPPORTED_EXTENSIONS.includes(ext)) {
           await processImage(fullPath, ext)
@@ -28,7 +28,7 @@ async function processImages() {
     }
   }
 
-  await processDirectory(ASSETS_DIR)
+  await processDirectory(ASSETS_DIR, true)
   console.log('Image processing complete!')
 }
 

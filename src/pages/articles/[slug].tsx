@@ -14,7 +14,7 @@ export default async function Index({ slug }: IndexProps) {
 
   return (
     <PageContainer title={article.title}>
-      <ArticleContainer title={article.title} category={article.category} date={article.date} excerpt={article.excerpt}>
+      <ArticleContainer title={article.title} category={article.category} date={article.date} excerpt={article.excerpt} toc={article.toc}>
         <article.default />
       </ArticleContainer>
     </PageContainer>

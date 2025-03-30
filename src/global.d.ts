@@ -4,8 +4,9 @@ declare module '*.module.css' {
 }
 
 declare module '*.mdx' {
-  const content: string
-  export default content
+  const toc: BlogArticleToc
+  const content: BlogArticleModule
+  export { toc, content as default }
 }
 
 interface ImportMeta {

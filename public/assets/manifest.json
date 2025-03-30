@@ -1,0 +1,22 @@
+{
+  "name": "Darky's Blog",
+  "short_name": "Darky's Blog",
+  "description": "别把看重的东西附上无边的价值",
+  "dir": "ltr",
+  "lang": "zh-CN",
+  "theme_color": "#121619",
+  "background_color": "#121619",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/assets/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

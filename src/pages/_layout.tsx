@@ -16,6 +16,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <div
       className="md:px-12 lg:px-16 xl:px-32 h-[100dvh] w-[100dvw] bg-carbongray-900 relative grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25dvh_25dvh_12.5dvh_1fr] md:grid-rows-[25dvh_12.5dvh_1fr]"
     >
+      <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
+      <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
+      <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
+      <link rel="manifest" href="/assets/manifest.json" />
       <div className="absolute left-0 top-0 right-0 h-[25dvh] md:px-12 lg:px-16 xl:px-32">
         <video
           loop

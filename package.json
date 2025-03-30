@@ -23,10 +23,10 @@
     "waku": "https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?0.21.24"
   },
   "devDependencies": {
+    "@altano/remark-mdx-toc-with-slugs": "^3.0.0",
     "@antfu/eslint-config": "^4.3.0",
     "@ibm/plex-mono": "^1.1.0",
     "@ibm/plex-sans-sc": "^1.1.0",
-    "@iconify-json/carbon": "^1.2.7",
     "@mdx-js/rollup": "^3.1.0",
     "@tailwindcss/postcss": "^4.0.8",
     "@tailwindcss/typography": "^0.5.16",
@@ -36,7 +36,10 @@
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
     "eslint": "^9.21.0",
+    "hast-util-from-html-isomorphic": "^2.0.0",
     "husky": "^9.1.7",
+    "rehype-autolink-headings": "^7.1.0",
+    "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "sass-embedded": "^1.85.0",
     "sharp": "^0.33.5",

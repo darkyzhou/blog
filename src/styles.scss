@@ -1,5 +1,37 @@
 @use '@ibm/plex-sans-sc/scss' as PlexSansSC with (
-  $font-prefix: '/assets'
+  $font-prefix: '/assets',
+  $font-weights: (
+    bold: false,
+    extralight: true,
+    light: true,
+    medium: false,
+    regular: false,
+    semibold: false,
+    text: false,
+    thin: false,
+  )
+);
+@use '@ibm/plex-mono/scss' as PlexMono with (
+  $font-prefix: '/assets',
+  $font-weights: (
+    bold: false,
+    boldItalic: false,
+    extralight: false,
+    extralightItalic: false,
+    italic: false,
+    light: true,
+    lightItalic: true,
+    medium: false,
+    mediumItalic: false,
+    regular: false,
+    semibold: false,
+    semiboldItalic: false,
+    text: false,
+    textItalic: false,
+    thin: false,
+    thinItalic: false
+  )
 );
 
-@include PlexSansSC.default();
+@include PlexSansSC.all();
+@include PlexMono.all();

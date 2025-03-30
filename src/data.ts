@@ -1,4 +1,4 @@
-import type { MDXModule } from 'mdx/types'
+import type { BlogArticleModule } from './types'
 
 function basename(path: string) {
   const parts = path.split('/')
@@ -14,18 +14,12 @@ function basename(path: string) {
   return last.replace(/\.[^.]+$/, '')
 }
 
-export type BlogArticleModule = {
-  title: string
-  date: string
-  category: string
-  excerpt: string
-} & MDXModule
-
 export const BLOG_ARTICLES = new Map(
   Object
     .entries(import.meta.glob<BlogArticleModule>('./articles/*.mdx', { eager: true }))
     .map(([key, module]) => [basename(key), module] as const),
 )
+
 export const SORTED_BLOG_ARTICLES = Array.from(BLOG_ARTICLES.entries())
   .toSorted(([_, a], [__, b]) => new Date(b.date).getTime() - new Date(a.date).getTime())
   .map(([slug, article]) => ({ slug, ...article }))

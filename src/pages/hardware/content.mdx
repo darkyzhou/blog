@@ -1,141 +1,202 @@
 import { BlogImage } from '../../components/BlogImage'
 
+本文将简要介绍我目前正在使用的计算机设备。其实除了对编程感兴趣之外，我也可以说是一个硬件「垃圾佬」。不过，大学时的我主要寻找的是一些廉价、性价比高的硬件，而如今我更倾向于寻找对我有独特意义的硬件，例如信创硬件。这些计算机设备的名字很多都取自我游玩的一款手游里的角色，你不妨猜猜看是哪款手游。
+
 ## theresa
 
 - CPU: Intel Core i7-12700T (8P+4E cores, 20 threads)
-- RAM: 2x32GB SAMSUNG 2Rx8 DDR4-3200
-- SSD1: KIOXIA EXCERIA G2 1TB
-- SSD2: ZHITAI PC005 Active 256GB
+- RAM: SAMSUNG 2Rx8 DDR4-3200 32GiB x 2
+- SSD1: KIOXIA EXCERIA G2 1TiB
+- SSD2: ZHITAI PC005 Active 256GiB
 - Motherboard: MAXSUN MS-CHALLENGER H610ITX 2LAN
 - OS: NixOS 25.05 (Warbler) x86_64
+- Kernel: 6.13.5-xanmod1
 
-这台主机主要用于日常的 Linux 开发，我给它安装了桌面环境。我原本打算用 [Hyprland](https://hyprland.org/) 作为桌面环境，但实际体验后发现我很难习惯 Tiling 窗口管理器的逻辑。最近我又看上了 [niri](https://github.com/YaLTeR/niri)，目前还在尝试中。
+这台主机主要用于日常的 Linux 开发，我给它安装了桌面环境。我原本打算用 [Hyprland](https://hyprland.org/) 作为桌面环境，但实际体验后发现我很难习惯 Tiling 窗口管理器的逻辑。这台主机和下面要介绍的 sirin 一样，使用了 [XanMod 内核](https://xanmod.org/)，它在原版内核的基础上添加了一些补丁来提高系统的稳定性、流畅度等。
 
 > 这其实是我的第六代 All in One 主机，前五代的 CPU 分别是：
-> - 第一代：Intel Core i3-9100
-> - 第二代：ZHAOXIN KaiXian KX-6640MA
-> - 第三代：Intel Core i5-8400T
-> - 第四代：AMD Ryzen 5 5800H
-> - 第五代：AMD Ryzen 9 3900X
+> - 第一代：Intel Core i3-9100F，服役时间 2020.1-2020.6。
+> - 第一点五代：Intel Pentium G4560，服役时间 2020.6-2021.3。
+> - 第二代：ZHAOXIN KaiXian KX-6640MA，服役时间 2021.3-?。
+> - 第三代：Intel Core i5-8400T，服役时间 ?-2022.6。
+> - 第四代：AMD Ryzen 5 5800H，服役时间 2022.10-2023.4。
+> - 第五代：AMD Ryzen 9 3900X，服役时间 2023.4-2024.9。
 
-这台主机原本安装的是 Proxmox VE，后来我把其中跑各种服务的 VM 搬迁到了下面要介绍的 sirin 上。此时它只剩下用于日常开发的 VM 了，我便将它重装为 NixOS。由此，它已经不能被称作 All in One 主机了。有趣的是，纵观我的六代 All in One 主机，可以发现一个趋势：承担不同职能的 VM 被不断地拆分到其他主机上，包括软路由、NAS 等职能。
+其实这台主机原本安装的是 Proxmox VE，后来我把其中跑各种服务的 VM 搬迁到了下面要介绍的 sirin 上。此时它只剩下用于日常开发的 VM 了，我便将它重装为 NixOS。由此，它已经不能被称作 All in One 主机了。有趣的是，纵观我的六代 All in One 主机，可以发现一个趋势：承担不同职能的 VM 被不断地拆分到其他主机上，包括软路由、NAS 等职能，这可能就是所谓的「合久必分」把。
 
-> 感谢 NixOS 的声明式配置，我几乎零成本地完成了服务的迁移。在新安装 NixOS 的 sirin 主机上，我可以一键应用之前写好的系统配置文件，其中包括各种服务的配置，NixOS 会根据这些配置自动完成各种服务的安装、配置和运行。最终得到和之前几乎完全一样的系统环境。
+> 感谢 NixOS 的声明式配置，我几乎零成本地完成了服务的迁移。在新安装 NixOS 的 sirin 主机上，我可以一键应用之前写好的系统配置文件，NixOS 会根据这些配置自动完成各种软件包和服务的安装、配置和运行，最终得到和之前几乎完全一样的系统环境。
 
-<BlogImage filePath='hardware/thehub' />
+<BlogImage filePath='hardware/thehub' caption="装机时拍的图，其中的电源购于京东自营，但插电后发现是坏的，我直接退货了" />
 
-上图是装机时拍的。里面的全新电源购于京东自营，但装好插电后发现是坏的，按电源键没有任何反应，我直接退货了。里面还有一张蓝色外壳的显卡，那是下面会专门介绍的 AMD Radeon Pro WX 4100，现在它已经被我换到下面的 herta 主机上了。
+上图中还有一张蓝色外壳的显卡，那是下面会专门介绍的 AMD Radeon Pro WX 4100，现在它已经被我换到下面的 herta 主机上了。
 
-<BlogImage filePath="hardware/thehub2" />
+<BlogImage filePath="hardware/thehub2" caption="这台主机位于我的书桌下，放在一张宜家的边桌上" />
 
-主机位于我的书桌下，放在一张宜家的边桌上。
+这台主机搭载的 i7-12700T 的发热很低，一个 120 水冷就能在全核负载下将它压制在 70 度左右，虽然这时候似乎出现了降频，性能核心的频率仅为 3.7 Ghz。
 
 ## timido
 
 - CPU: AMD Ryzen 9 9800X3D (8 cores, 16 threads)
-- RAM: 2x32GB ADATA XPG LANCER BLADE DDR5-6000
-- GPU: MSI GeForce RTX 4070 VENTUS 2X 12G OC
-- SSD1: SAMSUNG 990 EVO Plus 1TB
-- SSD2: SK Hynix Platinum P41 2TB
+- RAM: ADATA XPG LANCER BLADE DDR5-6000 32GiB x 2
+- GPU: GALAX GeForce RTX 5080 Magic Blade
+- SSD1: SAMSUNG 990 EVO Plus 1TiB
+- SSD2: SK Hynix Platinum P41 2TiB
 - Motherboard: GIGABYTE B650I AORUS ULTRA WIFI DDR5
 - OS: Windows 11 24H2
 
-这台主机主要用于游戏。
+拥有这个名号的主机主要用于游戏。
 
-<BlogImage filePath="hardware/timido" />
+<BlogImage filePath="hardware/timido" caption="它现在位于我的电视旁，机箱是 Acat 的 Abox One" />
 
-主机位于我的电视旁，机箱是 Acat 的 Abox one。
+如果从初中毕业算起，我已经换过好几代的游戏主机了：
+
+1. [联想小新 700-15ISK 笔记本](https://item.lenovo.com.cn/product/53354.html)
+
+    搭载 i5-6300HQ 和 GTX 950M，于 2016 年 6 月购入，价格是 5500 元左右。当时本打算自己组装一台台式机，但是当时家里出了一些不好的事情，我转而购买了这台笔记本，以取代小升初以来使用的戴尔 Inspiron 笔记本（搭载 i5-3210M 和 Radeon HD 7670M D3）。
+    
+    现在回头看仍然感到有些后悔，因为 GTX 950M 的性能相当差，我在 2017 年暑假游玩绝地求生时，它只能在全低画质和 720P 分辨率下勉强跑出 30 帧。如果当时选择组装台式机，我完全能够在预算内组出 E3-1231 v3 和 GTX 1060 的配置，包括显示器在内。其实当时的我并非不了解电脑硬件，皆因考完中考后一时的兴奋而匆匆地作出了决策。
+
+2. 自己组装的 ITX 主机
+
+    搭载 i3-9100F 和 GTX 1660S，于 2020 年 6 月组装。这里的 i3-9100F 及主板其实是从前文提到的第一代 All in One 主机拆下来的，当时疫情在家远程上课，实在感到无聊，便购买了机箱和显卡，组装了这台游戏主机。而在那之前的 2019 年 9 月，我已经将上述的笔记本卖掉了（当时的我认为自己不会再玩 PC 游戏了）。
+    
+    不过，在 2021 年寒假期间，我又开始觉得自己对 PC 游戏失去了兴趣，恰逢当时矿潮刚刚爆发，1399 元购入的 GTX 1660S 二手价格上涨到了 2000 元左右，我便将它连同 i3-9100F 一起卖掉了。没想到几个月后我就后悔了，因为此时它的价格已经一路飙升到了近 4000 元，我相当于白亏了 2000 元。
+    
+    这之后，我发誓不再随便卖掉游戏主机、放弃 PC 游戏。但苦于矿潮影响下显卡价格居高不下，我甚至购买了一张 R9 380 显卡用来过渡，但是到手刚上机之后就发现它的性能是如此低下，完全不能满足我的需求，就又卖掉了。在 2021 年 9 月结束在飞书的暑期实习之后，我于当年 11 月先后购入了 RTX 3060Ti 和 i5-9600KF，仍然使用之前的主板、内存等设备。
+    
+    大四下学期，刚刚结束在飞书的实习的我，苦于 i5-9600KF 羸弱的性能，最终购买了 i5-13600KF 和新的 mATX 主板以及[乔思伯 D30 机箱](https://www.jonsbo.com/products/D30heise.html)，这也是我第一次使用水冷散热。之后的几个月，我又将显卡升级到了 RTX 4070。淘汰下来的 i5-9600KF 和 RTX 3060Ti 被我卖给了同学。
+
+    2024 年底，因为感到乔思伯 D30 机箱看上去非常丑，开始后悔当初为什么要购买这样的侧透机箱，决定从机箱出发重新攒机，先找到足够满意的机箱再决定其它硬件的选型。于是就有了当前的 timido 主机。
+
+<BlogImage filePath="hardware/timido2" caption="影驰的这块 RTX 5080 显卡的外观相当方正，和我的机箱非常搭配" />
+
+最初装上这块 RTX 5080 开机之后，我发现当显示器的 DP 线接上它时，系统无法正常启动。于是我将 DP 线接到主板的 DP 接口上，通过核显成功启动系统，但是装好 RTX 5080 的显卡驱动之后，Windows 设备管理器提示「由于该设备有问题，Windows 已将其停止。（代码 43）」。
+
+我这时察觉到一件事实：机箱提供的 PCIe 延长线最高只能支持 PCIe 4.0，而我的主板和 RTX 5080 均支持 PCIe 5.0。我猜想可能是主板的 BIOS 默认选择了 PCIe 5.0 导致显卡无法正常工作。进入 BIOS 将 PCIe 速度固定为 4.0 后问题解决。
+
+## vita
+
+- CPU: Apple M4 (4P+6E cores, 10 threads)
+- RAM: LPDDR5X 16GiB
+- OS: macOS Sequoia 15.2
+
+这台笔记本是我的主力机，或者说 daily driver。我用它浏览网页，通过 SSH 连接到本文介绍的各个主机上进行开发和维护。它是我于 2024 年 10 月底在京东抢到的**第一批**国行 Macbook Pro 14 英寸，带国补。虽然事后被舍友吐槽说 M4 的 Macbook Pro 性价比很低，远不如 M4 Pro 的型号，后者比前者足足多 4 个大核。
+
+> 这里特别提一下 NixOS 的一个特性：远程部署。我可以在笔记本上编辑对应主机的配置文件，然后通过 `nixos-rebuild` 命令远程部署到对应的主机上，不需要通过 SSH 登录并手动输入各种命令。NixOS 的配置文件能够对系统的方方面面进行配置，包括软件包的安装、升级和卸载；各种服务的配置；内核的升级等。
+>
+> NixOS 的远程部署还有一个强大的特性：远程交叉编译并部署，例如：我可以在笔记本上同样运行 `nixos-rebuild` 命令，让它在性能较强的 x86_64 主机上交叉编译性能较弱的 aarch64 主机的程序，并通过远程部署到 aarch64 主机上。如果你对此感到兴趣，可以阅读[这篇文档](https://nixos-and-flakes.thiscute.world/zh/best-practices/remote-deployment)。
 
 ## herta
 
 - CPU: Loongson 3A6000-HV @ 2.5GHz (4 cores, 8 threads)
-- RAM: 2x8GB CXMT DDR4-2666
-- GPU: AMD Radeon Pro WX 4100 4GB GDDR5
-- SSD: ZHITAI PC005 Active 256GB
+- RAM: CXMT DDR4-2666 8GiB x 2
+- GPU: AMD Radeon Pro WX 4100 4GiB GDDR5
+- SSD: ZHITAI PC005 Active 256GiB
 - Motherboard: ASUS XC-LS3A6M
 - OS: AOSC OS (12.0.4)
 
-这台主机主要用于龙芯相关的桌面应用测试，例如由我负责维护的 [VSCodium](https://github.com/VSCodium/vscodium) 的龙架构版本。这台主机除了显卡以外，几乎可以说是由纯国产硬件组成。
+这台主机主要用于龙架构相关的桌面应用测试，例如由我负责维护的 [VSCodium](https://github.com/VSCodium/vscodium) 的龙架构版本。这台主机除了显卡以外，几乎可以说是由纯国产硬件组成。
 
-<BlogImage filePath="hardware/herta" />
+> 龙架构（LoongArch）是龙芯中科研发的指令集架构，应该可以说是国内首个自主研发的指令集架构（如果不算神秘的申威的话）。龙芯中科的创办人胡伟武教授领导设计了中国第一个具有完全知识产权的通用 CPU [龙芯一号](https://www.china-cpu.com/product_detail-27-35-33.html)。
+>
+> 如果你在百度或者谷歌上搜索「龙芯」，很可能会看到推荐搜索词中出现「龙芯骗局」或者「龙芯造假」之类的词，这应该是我长大以来看到的最匪夷所思的谣言了。事实上，真正造假的是由陈进领导研发的「汉芯」，[它被发现是将摩托罗拉芯片打磨去除表面商标字样后，再印上汉芯的标签生产的芯片](https://www.sohu.com/a/229727711_99970452)。据我所知，汉芯和龙芯没有任何关系，我实在无法理解为什么有如此多人会混淆这两个完全不同的词语。
 
-主机位于我的书桌下，放在了边桌旁边的地面上。
+如果你也对龙芯感兴趣，我不推荐购买这款华硕的主板，它存在一些奇怪的硬件缺陷，例如我这块主板的第一个 PCIe 槽以外的 PCIe 插槽存在问题，插在上面的网卡无法正常工作。我更推荐购买龙芯中科原厂设计的 XA61200 或 XA61201 主板。此外，龙芯 3A6000 的内存兼容性较差，你可能需要参考[社区的一些帖子](https://bbs.loongarch.org/d/322-3a6000)来选择合适的内存条。
 
-<BlogImage filePath="hardware/wx4100" />
-
-上图是 AMD Radeon Pro WX 4100 的照片，这里特别放出来，它的外壳设计非常好看。
+<BlogImage filePath="hardware/herta" caption="这台主机位于我的书桌下，放在了边桌旁边的地面上" />
+<BlogImage filePath="hardware/wx4100" caption="AMD Radeon Pro WX 4100 的照片，它的外壳设计真的非常好看" />
 
 ## yggdrasil
 
 - CPU: Loongson 3C6000 @ 2.2GHz (16 cores, 32 threads)
-- RAM: 4x32GB UniIC DDR4-3200 ECC RDIMM
-- SSD: KIOXIA EXCERIA G2 2TB
+- RAM: UniIC DDR4-3200 ECC RDIMM 32GiB x 4
+- SSD: KIOXIA EXCERIA G2 2TiB
 - OS: AOSC OS (12.0.4)
 
-这台主机主要用于龙芯的应用开发和维护，例如我维护的 [electron-loong64](https://github.com/darkyzhou/electron-loong64) 项目就是在这台主机上编译的。此外，这台主机还承担了 AOSC 的 Build Worker，负责编译 AOSC 源的各种龙架构软件包。你可以在 [AOSC BuildIt!](https://buildit.aosc.io/workers/54) 上看到这台主机的详情。
+这台主机主要用于龙芯的应用开发和维护，例如我维护的 [electron-loong64](https://github.com/darkyzhou/electron-loong64) 项目就是在这台主机上编译的。龙芯 3C6000 的性能相当不错，在龙芯的软件生态（包括编译器优化等）尚不成熟的当下，它据称在体感上有着接近 Ryzen 5 5700X 的性能表现。
+
+这台主机还承担了 AOSC 的 Build Worker 职能，负责编译 AOSC 源的各种龙架构软件包。你可以在 [AOSC BuildIt!](https://buildit.aosc.io/workers/54) 上看到这台主机的详情。我是通过 KVM 虚拟化来运行 Build Worker 所在的操作系统的，这期间还遇到了一些奇妙的问题，例如主板固件导致 KVM 虚拟机内部随机出现 Segmentation Fault、[libvirt 使用 virtio 作为 GPU 设备启动虚拟机会导致 EDK2 固件断言失败](https://gitlab.com/qemu-project/qemu/-/issues/2819#note_2360969443)、[libvirt 启动任何虚拟机会崩溃](https://gitlab.com/libvirt/libvirt/-/issues/752)等问题。
 
 <BlogImage filePath="hardware/yggdrasil" />
 
-上图是机箱内部的照片，主板右下角的插槽是 BMC 槽。这台主机位于我的客厅，因为它的风扇噪音较大。
+上图是机箱内部的照片，主板右下角空着的插槽是 BMC 槽，我给它安装了一块 Mellanox 的光口万兆网卡。这台主机位于我的客厅，因为它的风扇噪音较大，舍友总是向我抱怨它在房间里都能听到。它的功耗略高，且需要 24 小时不间断运行，每个月会给我带来额外 100 元左右的电费。
 
 ## datalake
 
 - Model: QNAP TS-532X
-- HDD: 3x8TB WD DC HC320
-- SSD: 2x500GB CRUCIAL MX500
+- HDD: WD DC HC320 8TiB x 3
+- SSD: CRUCIAL MX500 500GiB x 2
 
-这台主机主要用于 NAS 存储。它被放置在客厅的角落，因为三块 HC320 硬盘的炒豆子般的噪音相当可怕。
+这台主机主要用于 NAS 存储。它被放置在客厅的角落，因为三块 HC320 硬盘的炒豆子般的噪音相当可怕。曾经它被我放置在我房间中，导致我彻夜难眠。
 
 <BlogImage filePath="hardware/datalake" />
 
 ## sirin
 
 - CPU: Intel N100 (4 cores, 4 threads)
-- RAM: 1x8GB SEIWHALE DDR4-3200
-- SSD: ZHITAI SC005 Active 256GB
+- RAM: SEIWHALE DDR4-3200 8GiB
+- SSD: ZHITAI SC005 Active 256GiB
 - OS: NixOS 25.05 (Warbler) x86_64
+- Kernel: 6.13.5-xanmod1
 
-这台主机就是前文所说的，All in One 主机被拆分后，用于跑各种服务的主机。N100 自带的核显的视频编解码性能不错，可以用于 Jellyfin 串流。它运行的其它服务包括 qBittorrent、nginx、[vaultwarden](https://github.com/dani-garcia/vaultwarden) 等。
+这台主机就是前文所说的，在我的 All in One 主机被拆分后，用于跑各种服务的主机。N100 自带的核显的视频编解码性能不错，可以用于 Jellyfin 串流。它运行的其它服务包括 qBittorrent、nginx、[vaultwarden](https://github.com/dani-garcia/vaultwarden) 等。
 
-<BlogImage filePath="hardware/sirin" />
-
-如上图，它的体积相当小巧，功耗很低，我可以把它放在电脑桌上的显示器旁边。
+<BlogImage filePath="hardware/sirin" caption="它的体积相当小巧，功耗很低，我把它放在电脑桌上的显示器旁边" />
 
 ## raven
 
 - CPU: Phytium FT-2000/4 (4 cores, 4 threads)
-- RAM: 2x8GB CXMT 1Rx8 DDR4-3200
-- SSD: SAMSUNG PM851 128GB
+- RAM: CXMT 1Rx8 DDR4-3200 8GiB x 2
+- SSD: SAMSUNG PM851 128GiB
 - OS: NixOS 25.05 (Warbler) aarch64
 - Kernel: 6.13.3-aosc-main
 
 这台主机是我的软路由，我在上面运行了 SmartDNS、Tailscale、Dnsmasq 等服务。
 
-> Phytium FT-2000/4 是飞腾公司设计的 SoC，基于 ARMv8 架构。为了让它能够运行主线 Linux，并让 Linux 能够驱动其 SoC 提供的两个 MAC，我花费了一定功夫。详情请见[《给飞腾 FT-2000/4 编译 NixOS》](/articles/compiling-nixos-for-ft2000)。
-
 <BlogImage filePath="hardware/raven1" />
 
-上图是主板的照片，可以看到它有两个网口。事实上，这两个网口都是由 SoC 上的 Phytium DWMAC 和板载的 Realtek RTL8211F PHY 芯片提供的。
+上图是主板的照片，可以看到它有两个网口。事实上，这两个网口都是由 SoC 上的 Phytium DWMAC 和板载的 Realtek RTL8211F PHY 芯片提供的。我还给它插了一块浪潮服务器拆机的 [I350-T2 网卡](https://www.intel.com/content/www/us/en/products/sku/84804/intel-ethernet-server-adapter-i350t2v2/specifications.html)。
+
+> Phytium FT-2000/4 是飞腾公司设计的 SoC，基于 ARMv8 架构。[7zip 解压缩性能和隔壁龙芯 3A5000 相当](https://arc.net/l/quote/napdbfwg)。为了让它能够运行主线 Linux，并让 Linux 能够驱动其 SoC 提供的两个 MAC，我花费了一定功夫。详情请见[《给飞腾 FT-2000/4 编译 NixOS》](/articles/compiling-nixos-for-ft2000)。
 
 <BlogImage filePath="hardware/raven2" />
 
-由于这块 SoC 不自带 GPU，我在上手体验时必须先安装一块显卡。上图里的是摩尔线程的 S30 显卡。
+这台主机被我放置在客厅，夹在 datalake 和 yggdrasil 之间。其实它们下面的鞋柜内就是弱电箱，里面就是光猫。这三台设备被我连接到一台 10G 光口交换机上，并通过一个 10G 的光转电模块连接到我的房间的以太网口。
 
 ## ex-raven
 
-- CPU: ZHAOXIN KX-6640MA @ 2.5GHz (4 cores, 4 threads)
+- CPU: ZHAOXIN KX-6640MA (4 cores, 4 threads)
+- RAM: DDR4-2400 8GiB x 2
+- SSD: 128GiB
 
-## vita
+这台主机是我的第二代 All in One 主机，之后又被我作为软路由使用，现在被退役下来闲置了。它现在上电开机之后，散热风扇会传出一些烧焦的气味，我已经不敢再让它开机了（据称这台主机的内部做工很一般）。
 
-- CPU: Apple M4 (4P+6E cores, 10 threads)
-- RAM: 16GB LPDDR5X
-- OS: macOS Sequoia 15.2
+它搭载了兆芯于 2020 年底发布的 KX-6640MA 处理器，兼容 x86 架构，不过单核性能相当令人遗憾，甚至[不如我小学三年级时家里买的发布于 2008 年的 AMD Athlon 64 X2 5000+](https://www.cpubenchmark.net/compare/3872vs83/ZHAOXIN-KaiXian-KX-6640M-vs-AMD-Athlon-64-X2-Dual-Core-5000+)，多核性能也[仅和 Intel Core i3-550 相当](https://www.cpubenchmark.net/compare/3872vs739/ZHAOXIN-KaiXian-KX-6640M-vs-Intel-i3-550)。它并不支持于 2013 年发布的 AVX2 指令集，可能和下面提到的授权背景有关。
 
-> 这是我于 2024 年 10 月底在京东抢到的第一批国行 Macbook Pro 14 英寸，带国补。
-
-这台笔记本是我的主力机，我会用它浏览网页，通过 SSH 连接到本文介绍的各个主机上进行开发和维护。
-
-> 这里特别提一下 NixOS 的另一个特性：远程部署。我可以在笔记本上编辑对应主机的配置文件，然后通过 `nixos-rebuild` 命令远程部署到对应的主机上，并不需要像用其它发行版那样，通过 SSH 登录到对应的主机上手动修改各种配置文件。
+> 兆芯由上海国资委和台湾威盛电子（VIA）合资成立，其 x86 架构的授权很可能来自后者，且[其早期的 CPU 和 GPU 均由后者的产品改进而来](http://www.sohu.com/a/146720623_119709)。换句话说，兆芯的 CPU 技术来源可以追溯到古老的 VIA 以及更早的 [Cyrix](https://en.wikipedia.org/wiki/Cyrix)。
 >
-> NixOS 的远程部署还有一个强大的特性：远程交叉编译并部署，例如：我可以在笔记本上同样运行 `nixos-rebuild` 命令，让它在性能较强的 x86_64 主机上交叉编译性能较弱的 aarch64 主机的程序，并通过远程部署到 aarch64 主机上。如果你对此感到兴趣，可以阅读[《远程部署》](https://nixos-and-flakes.thiscute.world/zh/best-practices/remote-deployment)。
+> 技术源自老旧的架构可能就是兆芯 CPU 的单核性能极度低下的原因，这一问题直到最近发布的 KX-7000 系列仍然没有得到明显改善。相比之下，[获得了初代 ZEN 架构授权](https://en.wikipedia.org/wiki/Hygon_Information_Technology)的海光，其 CPU 性能就好多了。此外，或许也因为 VIA 似乎仍然和 Intel 存在一些专利纠纷，一些更新的 x86 指令集（特别是 AVX2）未被授权给兆芯，尽管 [VIA 自己有些产品支持 AVX2](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions#CPUs_with_AVX2)。
+
+<BlogImage filePath="hardware/ex-raven1" caption="这款主机的外观较为方正" />
+<BlogImage filePath="hardware/ex-raven2" caption="这款主机带有两个笔记本内存插槽，以及两个 2280 规格的 M.2 NVMe 插槽" />
+
+## sakimi
+
+- CPU: Loongson 2F (1 core, 1 thread)
+- RAM: Transcend DDR2-667 1GiB
+- Drive: SanDisk Ultra microSD card 32GiB
+- OS: NixOS 25.05 (Warbler) mips64
+- Kernel: 6.6.25-NixOS
+
+这是一台航天龙梦（Lemote）于 [2008 年 12 月](https://arc.net/l/quote/dkjheqjb)发布的逸珑 8089 笔记本，具体的型号可能是 8089A，因为它出厂自带的是 512MiB 的内存以及 2GiB 的 SSD。[它被称为中国自己研发制造的第一台笔记本电脑](http://cniti.com/index.php/article/index/id/208)，也是著名的自由软件运动和 GNU 项目的发起人 Richard Stallman [在 2010 年至 2012 年期间使用的电脑](https://arc.net/l/quote/trncybfc)（不幸的是，他的这台笔记本在 2012 年时放在包里被偷了）。
+
+<BlogImage filePath="hardware/sakimi1" caption="这台笔记本的正面照，成色和质感相当不错" />
+
+这台笔记本搭载的是单核心的 Loongson 2F 处理器，发布于 2007 年，[兼容 MIPS-III 64bit 架构](https://arc.net/l/quote/eveyualf)。[MIPS-III 架构](https://arc.net/l/quote/qdxklpzc)是一款发布于 1991 年的古老架构，可以说是龙芯于两年后推出的 3A1000 处理器所兼容的 MIPS64 Release 2 架构的太祖父。
+
+<BlogImage filePath="hardware/sakimi2" caption='这台笔记本原装的系统截图，内核还是 2008 年 10 月发布的 2.6.27' />
+
+Loongson 2F 这款处理器在当年相当流行，对它的支持很早就进入了 Linux 和 GCC 主线，以至于直到 2025 年的今天，我们仍然可以用 GCC 14 编译出一份能够在它上面运行的 Linux 6.6.25 内核以及 NixOS 发行版。也许你已经注意到博客左侧或底部的「Powered by」字样了，本博客实际上正是在这台笔记本上运行的。详情请见[《在龙芯 2F 上运行我的博客》](/articles/running-my-blog-on-loongson-2f)。
+
+<BlogImage filePath="hardware/sakimi3" caption="在这台笔记本上运行 NixOS 的截图" />
 

@@ -349,3 +349,85 @@ RangeError: invalid array length
 $ ls
 lost+found  nix  nix-path-registration
 ```
+
+
+
+
+
+
+
+
+
+```nix
+{
+  stdenv,
+  nodejs_22,
+  pnpm,
+  vips,
+}:
+stdenv.mkDerivation(final: {
+  pname = "blog";
+  version = "2025-3-26";
+
+  src = builtins.fetchGit {
+    url = "git@github.com:darkyzhou/blog.git";
+    ref = "main";
+    rev = "7914943074d4edd8b050164edaa409288ee125c1";
+  };
+
+  nativeBuildInputs = [
+    nodejs_22
+    pnpm.configHook
+    vips
+  ];
+
+  pnpmDeps = pnpm.fetchDeps {
+    inherit (final) pname version src;
+    hash = "sha256-rAKwU9RZ+BenNoH60vXBuRpY6qiJkAQsIXVzOCjZ6xQ=";
+  };
+
+  buildPhase = ''
+    export HOME=$PWD
+    pnpm config set store-dir ${final.pnpmDeps}
+    pnpm i --offline
+    pnpm build
+  '';
+
+  installPhase = ''
+    mkdir -p $out
+    cp -r dist/ $out/
+  '';
+})
+```
+
+```
+vite v6.2.3 building SSR bundle for production...
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+Error: spawn /build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart ENOENT
+    at ChildProcess._handle.onexit (node:internal/child_process:285:19)
+    at onErrorNT (node:internal/child_process:483:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Emitted 'error' event on ChildProcess instance at:
+    at ChildProcess._handle.onexit (node:internal/child_process:291:12)
+    at onErrorNT (node:internal/child_process:483:16)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'spawn /build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart',
+  path: '/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart',
+  spawnargs: [
+    '/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/sass.snapshot',
+    '--embedded'
+  ]
+}
+```
+
+```
+$ ./sass
+Could not start dynamically linked executable: /tmp/nix-build-blog-2025-3-26.drv-0/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart
+NixOS cannot run dynamically linked executables intended for generic
+linux environments out of the box. For more information, see:
+https://nix.dev/permalink/stub-ld
+```

@@ -1,12 +1,12 @@
 import { ArticleContainer } from '@/components/ArticleContainer'
 import { PageContainer } from '@/components/PageContainer'
-import Content from './content.mdx'
+import * as content from './content.mdx'
 
 export default async function Index() {
   return (
     <PageContainer title="关于">
-      <ArticleContainer title="关于">
-        <Content />
+      <ArticleContainer title="关于" toc={content.toc}>
+        <content.default />
       </ArticleContainer>
     </PageContainer>
   )
