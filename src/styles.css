@@ -81,6 +81,10 @@
   }
 }
 
+body {
+  overscroll-behavior-y: none;
+}
+
 *:focus-visible {
   @apply outline-[2px] outline-carbongray-200;
 }

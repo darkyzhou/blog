@@ -1,8 +1,4 @@
-'use client'
-
 import type { PropsWithChildren } from 'react'
-import { useLayoutEffect, useRef } from 'react'
-import { useRouter_UNSTABLE as useRouter } from 'waku'
 import { Footer } from './Footer'
 
 export type PageContainerProps = PropsWithChildren<{
@@ -10,31 +6,10 @@ export type PageContainerProps = PropsWithChildren<{
 }>
 
 export function PageContainer({ children, title }: PageContainerProps) {
-  const router = useRouter()
-  const containerRef = useRef<HTMLDivElement | null>(null)
-
   const fullTitle = `${title} ·  Darky's Blog`
-
-  useLayoutEffect(() => {
-    if (!containerRef.current || router.path === '/') {
-      return
-    }
-
-    const handle = setTimeout(() => {
-      if (!containerRef.current) {
-        return
-      }
-
-      containerRef.current.scrollTo({ top: 0 })
-    }, 0)
-
-    return () => clearTimeout(handle)
-  }, [router.path])
-
   return (
     <article
-      ref={containerRef}
-      className="relative row-span-full col-start-1 md:col-start-3 col-end-12 grid grid-cols-subgrid grid-rows-[repeat(3,auto)1fr] min-h-0 overflow-y-auto pointer-events-none md:-mr-12 lg:-mr-16 xl:-mr-32"
+      className="relative row-span-full col-start-1 md:col-start-3 col-end-12 grid grid-cols-subgrid grid-rows-[repeat(3,auto)1fr] min-h-0 pointer-events-none md:-mr-12 lg:-mr-16 xl:-mr-32"
     >
       <title>{fullTitle}</title>
       <div className="row-start-1 col-span-8 h-[50dvh] md:h-[25dvh]" />
