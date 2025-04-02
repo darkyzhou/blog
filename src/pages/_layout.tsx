@@ -14,13 +14,15 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <div
-      className="md:px-12 lg:px-16 xl:px-32 w-[100dvw] bg-carbongray-900 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25dvh_25dvh_12.5dvh_1fr] md:grid-rows-[25dvh_12.5dvh_1fr]"
+      className="md:px-12 lg:px-16 xl:px-32 w-[100dvw] bg-carbongray-900 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25vh_25vh_12.5vh_1fr] md:grid-rows-[25vh_12.5vh_1fr]"
     >
+      <meta name="theme-color" content="#161616" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black" />
       <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
       <link rel="manifest" href="/assets/manifest.json" />
-      <div className="fixed left-0 top-0 right-0 h-[25dvh] md:px-12 lg:px-16 xl:px-32">
+      <div className="sticky top-0 row-start-1 row-end-1 col-span-full h-[25vh] md:-mx-12 lg:-mx-16 xl:-mx-32 md:px-12 lg:px-16 xl:px-32">
         <video
           loop
           muted
@@ -32,7 +34,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         </video>
         <NavBar />
       </div>
-      <aside className="sticky top-[25dvh] md:h-[75dvh] row-start-2 row-end-2 md:row-end-4 col-span-full md:col-span-2 bg-carbongray-900 md:bg-carbongray-800 grid grid-cols-subgrid grid-rows-subgrid md:flex md:flex-col text-carbongray-100 md:border-x border-carbongray-600">
+      <aside className="sticky top-[25vh] md:h-[75vh] row-start-2 row-end-2 md:row-end-4 col-span-full md:col-span-2 bg-carbongray-900 md:bg-carbongray-800 grid grid-cols-subgrid grid-rows-subgrid md:flex md:flex-col text-carbongray-100 md:border-x border-carbongray-600">
         <div className="col-span-3 md:flex-none flex flex-col border-r md:border-none border-carbongray-600/40">
           <Link to="/articles/commission-on-avatar" className="block group flex-1 min-h-0 bg-carbongray-800 relative">
             <img src="/assets/avatar.jpg" alt="avatar" className="w-full h-full object-cover aspect-square brightness-95 saturate-95" draggable={false} />
@@ -84,7 +86,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         </div>
       </aside>
       <div
-        className="hidden md:flex fixed top-[25dvh] bottom-0 left-0 w-12 lg:w-16 xl:w-32 py-2 px-1 items-end select-none"
+        className="hidden md:flex fixed top-[25vh] bottom-0 left-0 w-12 lg:w-16 xl:w-32 py-2 px-1 items-end select-none"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',

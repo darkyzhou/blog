@@ -19,7 +19,7 @@ export default async function Index() {
           />
         ))}
       </ArticleList>
-      <div className="h-[25dvh]" />
+      <div className="h-[25vh]" />
     </PageContainer>
   )
 }

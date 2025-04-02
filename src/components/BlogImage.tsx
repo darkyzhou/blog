@@ -29,7 +29,7 @@ export function BlogImage({ basePath = DEFAULT_BASE_PATH, filePath, extension = 
           <img {...props} alt={alt} src={src} className="max-w-full max-h-full cursor-zoom-out object-contain" />
         </div>
       )}
-      <img {...props} alt={alt} onClick={toggleZoom} src={src} className="cursor-zoom-in max-w-[80%] max-h-[40dvh] mb-2" />
+      <img {...props} alt={alt} onClick={toggleZoom} src={src} className="cursor-zoom-in max-w-[80%] max-h-[40vh] mb-2" />
       {caption && <p className="text-center text-sm mt-0 text-carbongray-300">{caption}</p>}
     </>
   )

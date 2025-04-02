@@ -13,7 +13,7 @@ export default async function Index() {
           <CategoryCard key={slug} slug={slug} category={category.title} excerpt={category.excerpt} />
         ))}
       </ArticleList>
-      <div className="h-[25dvh]" />
+      <div className="h-[25vh]" />
     </PageContainer>
   )
 }

@@ -24,7 +24,7 @@ export default async function Index({ slug }: IndexProps) {
           <ArticleCard key={article.slug} slug={article.slug} category={BLOG_CATEGORIES[article.category]?.title ?? '无分类'} title={article.title} date={article.date} excerpt={article.excerpt} />
         ))}
       </ArticleList>
-      <div className="h-[25dvh]" />
+      <div className="h-[25vh]" />
     </PageContainer>
   )
 }

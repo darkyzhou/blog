@@ -72,6 +72,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -82,7 +83,7 @@
 }
 
 body {
-  overscroll-behavior-y: none;
+  @apply overscroll-none md:overscroll-x-auto;
 }
 
 *:focus-visible {
@@ -126,16 +127,16 @@ body {
   content: none;
 }
 
-.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
   @apply underline decoration-carbongray-500 touch-screen:decoration-carbongray-200 decoration-dashed decoration-1 underline-offset-4;
 }
 
-.prose :where(a):not(:where([class~="not-prose"],[class~="not-prose"] *)):hover {
+.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):hover {
   @apply decoration-carbongray-200;
 }
 
 .prose :is(h1, h2, h3, h4, h5, h6) {
-  scroll-margin-top: calc(25dvh + 16px);
+  scroll-margin-top: calc(25vh + 16px);
   @apply underline decoration-dashed decoration-transparent decoration-1 underline-offset-4;
 }
 
