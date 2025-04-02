@@ -1,433 +1,771 @@
 import { BlogImage } from '../components/BlogImage'
 
-export const title = '在龙芯 2F 上运行我的博客'
+export const title = '在龙芯 2F 上运行 NixOS 以及我的博客'
 export const date = '2025-03-28T23:12:25.123Z'
 export const category = 'linux'
 export const excerpt = `
-TODO
-`
+龙芯 2F 是龙芯中科于 2007 年发布的单核心 MIPS 处理器，我不仅成功在它上面运行了现代的 Linux 内核以及 NixOS，还将本博客迁移到了上面运行
+`.trim()
 
-## 前言
+## 起因
 
-本博客使用的是 waku 框架，一个基于 React 的 SSR/SSG 框架。
+今年的 2 月初，我在闲鱼上淘到了一台逸珑 8089A 笔记本，它是航天龙梦（Lemote）于 2008 年 12 月发布的笔记本，[被称为中国自己研发制造的第一台笔记本电脑](http://cniti.com/index.php/article/index/id/208)，也是著名的自由软件运动和 GNU 项目的发起人 Richard Stallman [在 2010 年至 2012 年期间使用的电脑](https://arc.net/l/quote/trncybfc)（不幸的是，他的这台笔记本在 2012 年时放在包里被偷了）。
 
-手头的龙芯 2F 设备其实是 9003，这款一体机主板因为南桥芯片没有进入 Linux 主线，似乎只能使用 Lemote 出厂提供的 2.6.27 内核（https://github.com/loongson-community/linux-stable/issues/3#issuecomment-402669069）
+<BlogImage filePath="hardware/sakimi1" caption="这台笔记本的正面照，成色和质感都相当不错" />
 
-Node 很久以前 https://github.com/nodejs/node/issues/26179 就已经不带支持 Mips64 架构的版本了，而且像 waku 这样的现代框架对 Node 版本要求比较高，所以似乎没有办法在这台设备上使用 Node 运行。
+这台笔记本搭载的是单核心的龙芯 2F 处理器（Loongson-2F），发布于 2007 年，[兼容 MIPS-III 64bit 架构](https://arc.net/l/quote/eveyualf)。[MIPS-III 架构](https://arc.net/l/quote/qdxklpzc)是一个发布于 1991 年的古老架构，可以说是龙芯于两年后推出的 3A1000 处理器所兼容的 MIPS64 Release 2 架构的太祖父。
 
-不过，waku 框架使用的后端框架是 Hono，它并不是一个简单的基于 Node 的框架，而是基于 WinterCG 标准的。
+> 我对 MIPS 架构的印象基本只有两件事：大二学习计算机组成原理时，教授要求我们在 Vivado 上制作一款带流水线和分支预测的 MIPS CPU，以及大学时我在宿舍使用的极路由 4，它搭载了基于 MIPS 架构的 MT7621。
 
-WinterCG 标准定义了在浏览器之外运行 JavaScript 的标准，
+<BlogImage filePath="hardware/sakimi2" caption='这台笔记本原装的系统截图，内核还是 2008 年 10 月发布的 2.6.27' />
 
-理论上我可以使用旧版的 Node 模拟出符合 WinterCG 标准的 JavaScript 运行时，但是这可能需要额外转译 waku 编译后的代码，使其能够在旧版 Node 所支持的 ECMAScript** 标准下运行。**
+龙芯 2F 在当年相当流行，对它的支持很早就进入了 Linux 和 GCC 主线。于是，我开始思考一个可能性：是否可能在上面运行现代的 Linux 内核，以及 NixOS 呢？如果可以的话，那么或许在上面运行我的博客的框架也是一件可以做到的事情了。
 
-换句话说，只要我们能提供一个符合 WinterCG 标准的 JavaScript 运行时，就可以在龙芯 2F 上运行 waku 框架。
+接下来，本文将介绍我为这台逸珑 8089A 笔记本编译现代的 Linux 内核以及 NixOS 的过程，之后，我还会介绍如何在这种古老的 MIPS-III 架构的处理器上运行由 JavaScript 编写的本博客使用的 React 框架，并使 [Server Components](https://react.dev/reference/rsc/server-components) 正常运行。
 
-Txiki.js 就是一个基于 QuickJS 实现的符合 WinterCG 标准的 JavaScript 运行时，我们应该可以尝试交叉编译它。
+> 这里先列出本文会用到的相关配置和代码的仓库链接，欢迎给 star：
+> - NixOS 配置：https://github.com/darkyzhou/nixos-loongson2f
+> - Waku 框架的修改版：https://github.com/darkyzhou/waku
 
-## 交叉编译 Txiki.js
+## 编译 Linux 内核和 NixOS
 
-为什么需要交叉编译 Txiki.js？因为 Txiki 在 CMakelist 里指定最低的 C 版本是 11，而我这台龙芯上的 Debian 6 只能提供 ？ 版本的 GCC。
+### dram 的配置
 
+通过在互联网上寻找有关龙芯 2F 的资料，我发现在去年 4 月一位名为 dram 的开发者[已经成功在这台笔记本上运行了 NixOS](https://web.archive.org/web/20250106210601/https://cohost.org/dram/post/5512696-the-nix-os-loongson-2)，他还在 GitHub 上发布了[他的 NixOS 配置文件](https://github.com/dramforever/nixos-loongson2f)，如下面的代码所示。
 
-```plain
-$ ct-ng list-samples
-Status  Sample name
-...
-[L...]   mips-ar2315-linux-gnu
-[L...]   mips-malta-linux-gnu
-[L...]   mips-unknown-elf
-[L...]   mips-unknown-linux-gnu
-[L...]   mips-unknown-linux-uclibc
-[L...]   mips64-unknown-linux-gnu
-[L...]   mips64el-multilib-linux-uclibc
-[L...]   mipsel-multilib-linux-gnu
-[L...]   mipsel-sde-elf
-[L...]   mipsel-unknown-linux-gnu
-...
- L (Local)       : sample was found in current directory
- G (Global)      : sample was installed with crosstool-NG
- X (EXPERIMENTAL): sample may use EXPERIMENTAL features
- B (BROKEN)      : sample is currently broken
- O (OBSOLETE)    : sample needs to be upgraded
-```
-
-我认为我们应该使用静态编译，这样生成的可执行文件可以不依赖于任何动态库。否则我很担心设备上的 Debian 6 的动态库版本太低，导致 Txiki 无法正常运行，特别是 glibc 的版本。
-
-```
-# 查看这个配置的详细信息
-$ ct-ng show-mips64el-multilib-linux-uclibc
-[L...]   mips64el-multilib-linux-uclibc
-    Languages       : C,C++
-    OS              : linux-6.13
-    Binutils        : binutils-2.43.1
-    Compiler        : gcc-14.2.0
-    Linkers         :
-    C library       : uClibc-ng-1.0.50
-    Debug tools     :
-    Companion libs  : gmp-6.3.0 isl-0.26 mpc-1.3.1 mpfr-4.2.1 zlib-1.3.1 zstd-1.5.6
-    Companion tools :
-
-# 套用这个配置，我们之后需要基于这个配置做其它修改
-$ ct-ng show-mips64el-multilib-linux-uclibc
-```
-
-龙芯 2F 的架构是 MIPS-III-64Bit，它几乎是后来被称为 Mips64el 架构的鼻祖。我们需要运行 `ct-ng menuconfig`，修改其中的配置：
-
-1. 在 Target Options 中将 Architecture Level 设置为 `mips3`
-
-<BlogImage filePath="/running-my-blog-on-loongson-2f/target_options" />
-
-此外，还需要在 Operating System 的 Version of linux 选择 crosstool-NG 所支持的最老的 2.6.32.71 版本（它和 2.6.27 非常接近，只相差一年左右）。
-
-<BlogImage filePath="/running-my-blog-on-loongson-2f/os_options" />
-
-第一次构建出了一些小插曲，磁盘空间不足了。
-
-```
-$ nix-collect-garbage
-...
-deleting '/nix/store/dk538kmncbpyfdz6v6mmw0pdfrs9h0ap-perl5.40.0-Test-Requires-0.11'
-deleting '/nix/store/dr0khc0w9fnk3s3bdcz62azabwn0983w-linux-pam-1.6.1_fish-completions'
-deleting '/nix/store/jqjkkdibdaazpa2wgf5vrlcd1d16qzyi-kbd-mips64el-unknown-linux-gnuabi64-2.7.1-vlock'
-deleting unused links...
-note: currently hard linking saves -0.00 MiB
-21857 store paths deleted, 101229.54 MiB freed
-```
-
-接下来重新运行构建。
-
-```
-$ ct-ng build
-...
-[INFO ]  =================================================================
-[INFO ]  Installing C library
-[INFO ]    =================================================================
-[INFO ]    Building for multilib 1/3: ''
-[EXTRA]      Copying sources to build dir
-[EXTRA]      Applying configuration
-[EXTRA]      Building C library
-[ERROR]      libc/sysdeps/linux/common/clock_adjtime.c:18:2: error: #error "clock_adjtime syscall is not defined!"
-[ERROR]      make[1]: *** [Makerules:373: libc/sysdeps/linux/common/clock_adjtime.os] Error 1
-[ERROR]   
-[ERROR]  >>
-[ERROR]  >>  Build failed in step 'Building for multilib 1/3: '''
-[ERROR]  >>        called in step 'Installing C library'
-[ERROR]  >>        called in step '(top-level)'
-[ERROR]  >>
-[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@378]
-[ERROR]  >>        called from: uClibc_ng_backend_once[scripts/build/libc/uClibc-ng.sh@107]
-[ERROR]  >>        called from: CT_IterateMultilibs[scripts/functions@1610]
-[ERROR]  >>        called from: uClibc_ng_main[scripts/build/libc/uClibc-ng.sh@10]
-[ERROR]  >>        called from: do_libc_main[scripts/build/libc.sh@33]
-[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@712]
-[ERROR]  >>
-[ERROR]  >>  For more info on this error, look at the file: 'build.log'
-[ERROR]  >>  There is a list of known issues, some with workarounds, in:
-[ERROR]  >>      https://crosstool-ng.github.io/docs/known-issues/
-[ERROR]  >>
-[ERROR]  >>  If you feel this is a bug in crosstool-NG, report it at:
-[ERROR]  >>      https://github.com/crosstool-ng/crosstool-ng/issues/
-[ERROR]  >>
-[ERROR]  >>  Make sure your report includes all the information pertinent to this issue.
-[ERROR]  >>  Read the bug reporting guidelines here:
-[ERROR]  >>      http://crosstool-ng.github.io/support/
-[ERROR]   
-[ERROR]  (elapsed: 4:22.22)
-[04:23] / gmake: *** [/usr/local/bin/ct-ng:261: build] Error 2
-```
-
-好吧，看来 uClibc 的版本太高了，以至于它假设了 Linux 内核提供的头文件中存在 `clock_adjtime` 系统调用。
-
-观察 crosstool-NG 的 GitHub 仓库，发现分支里有一个 `1.22` 分支，最后更新于十年前，这个分支上 uClibc 的版本最低是 0.9.33.2，似乎可以尝试使用这个分支。
-
-我在 `debian:9` 镜像中尝试编译这个 crosstool-NG：
-
-```
-deb http://archive.debian.org/debian/ stretch main contrib non-free
-deb http://archive.debian.org/debian/ stretch-proposed-updates main contrib non-free
-deb http://archive.debian.org/debian-security stretch/updates main contrib non-free
-```
-
-```
-# 安装依赖
-$ apt install build-essential autoconf cmake gperf bison flex texinfo wget curl help2man gawk libtool libtool-bin libncurses-dev
-
-$ ./configure
-
-# 编译
-$ make
-
-# 安装
-$ make install
-```
-
-我们接下来重复先前的步骤，对配置进行修改。
-
-```
-# 查看支持的架构
-$ ct-ng list-samples
-...
-[L..]   mips-ar2315-linux-gnu
-[L..]   mips-malta-linux-gnu
-[L..]   mips-unknown-elf
-[L..]   mips-unknown-linux-uclibc
-[L..]   mips64el-n32-linux-uclibc
-[L..]   mips64el-n64-linux-uclibc
-[L..]   mipsel-sde-elf
-[L..]   mipsel-unknown-linux-gnu
-...
- L (Local)       : sample was found in current directory
- G (Global)      : sample was installed with crosstool-NG
- X (EXPERIMENTAL): sample may use EXPERIMENTAL features
- B (BROKEN)      : sample is currently broken
-
-# 套用这个配置
-$ ct-ng mips64el-n64-linux-uclibc
-
-# 对配置进行修改
-$ ct-ng menuconfig
-```
-
-这里除了修改 Architecture Level 为 `mips3`，以及修改 Operating System 的 Version of linux 为 `2.6.32.71` 之外，还需要在 C-library 中修改 uClibc 的版本为 `0.9.33.2`。
-
-<BlogImage filePath="/running-my-blog-on-loongson-2f/uclibc" />
-
-注意到这个版本的 crosstool-NG 提供的 GCC 版本最高为 5.2.0，应该能够满足 Txiki 依赖的 TODO 的 C11 要求。
-
-我曾尝试使用 Debian 9，但它提供的 GCC 6 无法编译 GCC 5.2.0，似乎和 https://www.reddit.com/r/linuxquestions/comments/ohrn9f/i_cant_compile_gcc_error_const_char_libc_name/ 提到的有关。无奈只能使用 Debian 8，它提供的 GCC 版本是 4.9.2。
-
-接下来运行 `ct-ng build`，中途出现下面的报错：
-
-```
-$ ct-ng build
-...
-[EXTRA]    Retrieving 'isl-0.14'
-[ERROR]   
-[ERROR]  >>
-[ERROR]  >>  Build failed in step 'Retrieving needed toolchain components' tarballs'
-[ERROR]  >>        called in step '(top-level)'
-[ERROR]  >>
-[ERROR]  >>  Error happened in: do_isl_get[scripts/build/companion_libs/121-isl.sh@16]
-[ERROR]  >>        called from: do_companion_libs_get[scripts/build/companion_libs.sh@15]
-[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@591]
-[ERROR]  >>
-[ERROR]  >>  For more info on this error, look at the file: 'build.log'
-[ERROR]  >>  There is a list of known issues, some with workarounds, in:
-[ERROR]  >>      '/usr/local/share/doc/crosstool-ng//B - Known issues.txt'
-[ERROR]   
-[ERROR]  (elapsed: 1:05.47)
-[01:05] / gmake: *** [/usr/local/bin/ct-ng:152: build] Error 1
-```
-
-看来是 `/usr/local/lib/scripts/build/companion_libs/121-isl.sh` 中的下载镜像已经过时了，[这个 issue](https://github.com/crosstool-ng/crosstool-ng/issues/1624) 里提到了新的下载镜像 `https://gcc.gnu.org/pub/gcc/infrastructure`。
-
-```
-https://ftp.gnu.org/gnu/isl/isl-0.26.tar.xz
-```
-
-继续运行 `ct-ng build`，这次遇到了如下的报错：
-
-```
-$ ct-ng build
-...
-[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:692:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
-[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:693:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
-[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:694:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
-[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:695:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
-[ERROR]    /theblog/crosstool-ng/.build/src/gcc-5.2.0/gcc/wide-int.h:696:20: error: incomplete type 'wi::int_traits<generic_wide_int<trailing_wide_int_storage> >' used in nested name specifier
-[ERROR]    gmake[2]: *** [Makefile:2429: build/read-rtl.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/genattr.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/genconditions.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/genattr-common.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/gensupport.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/genpreds.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/rtl.o] Error 1
-[ERROR]    gmake[2]: *** [Makefile:2429: build/genautomata.o] Error 1
-[ERROR]    gmake[1]: *** [Makefile:4101: all-gcc] Error 2
-[ERROR]   
-[ERROR]  >>
-[ERROR]  >>  Build failed in step 'Installing pass-1 core C gcc compiler'
-[ERROR]  >>        called in step '(top-level)'
-[ERROR]  >>
-[ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@257]
-[ERROR]  >>        called from: do_gcc_core_backend[scripts/build/cc/100-gcc.sh@537]
-[ERROR]  >>        called from: do_gcc_core_pass_1[scripts/build/cc/100-gcc.sh@112]
-[ERROR]  >>        called from: do_cc_core_pass_1[scripts/build/cc.sh@35]
-[ERROR]  >>        called from: main[scripts/crosstool-NG.sh@646]
-```
-
-
-Txiki 要求现代的依赖项，我们需要将编译好的 crosstool-NG 的工具链转移到 Debian 12 上。
-
-```
-$ apt install libcurl4-openssl-dev build-essential cmake autoconf texinfo libtool libltdl-dev
-```
-
-
-编译 openssl：
-
-```
-export CC="/theblog/x-tools/mips64el-n64-linux-uclibc/bin/mips64el-n64-linux-uclibc-gcc"
-export CXX="/theblog/x-tools/mips64el-n64-linux-uclibc/bin/mips64el-n64-linux-uclibc-g++"
-export CFLAGS="-march=mips3 -mabi=64 -EL -static"
-export CXXFLAGS="-march=mips3 -mabi=64 -EL -static"
-export LDFLAGS="-static"
-```
-
-又遇到了下面的报错。看来我们用 crosstool-NG 编译的工具链不足以编译现代的 openssl。
-
-```
-...
-./libcrypto.a(libcrypto-lib-bio_sock.o): In function `BIO_gethostbyname':
-bio_sock.c:(.text+0x62c): warning: gethostbyname is obsolescent, use getnameinfo() instead.
-./libssl.a(libssl-lib-json_enc.o): In function `ossl_json_f64':
-json_enc.c:(.text+0x208c): undefined reference to `__isnan'
-json_enc.c:(.text+0x20a8): undefined reference to `__isinf'
-/theblog/x-tools/mips64el-n64-linux-uclibc/bin/../mips64el-n64-linux-uclibc/sysroot/usr/lib64/libdl.a(libdl.os): In function `_dl_parse_relocation_information':
-libdl.c:(.text+0x1684): undefined reference to `TLS_DTPREL_VALUE'
-libdl.c:(.text+0x16b0): undefined reference to `TLS_DTPREL_VALUE'
-libdl.c:(.text+0x16c8): undefined reference to `TLS_TPREL_VALUE'
-libdl.c:(.text+0x16e8): undefined reference to `TLS_TPREL_VALUE'
-libdl.c:(.text+0x16f0): undefined reference to `TLS_TPREL_VALUE'
-collect2: error: ld returned 1 exit status
-make[1]: *** [Makefile:14728: apps/openssl] Error 1
-make[1]: Leaving directory '/theblog/openssl-3.4.1'
-make: *** [Makefile:2989: build_sw] Error 2
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```
-$ tjs run serve-txiki.js 
-AsyncLocalStorage is not available
-ReferenceError: could not load 'node:async_hooks'
-```
-
-https://developers.cloudflare.com/workers/runtime-apis/nodejs/asynclocalstorage/
-
-
-
-
-```
-RangeError: invalid array length
-    at set (native)
-    at <anonymous> (polyfills.js:1:93174)
-```
-
-
-
-
-
-
-
-
-```
-$ ls
-lost+found  nix  nix-path-registration
-```
-
-
-
-
-
-
-
-
+从他的博文和 NixOS 配置看，他使用的是去年最新的 LTS 内核，版本是 6.6.25，并且只附加了来自 [loongson-community/linux-2f](https://github.com/loongson-community/linux-2f) 仓库的两个内核补丁。根据这两个补丁的表述，它们修复了龙芯 2F 的笔记本上的键盘组合键功能，以及提供了风扇控制、温度检测等功能。
 
 ```nix
 {
-  stdenv,
-  nodejs_22,
-  pnpm,
-  vips,
-}:
-stdenv.mkDerivation(final: {
-  pname = "blog";
-  version = "2025-3-26";
-
-  src = builtins.fetchGit {
-    url = "git@github.com:darkyzhou/blog.git";
-    ref = "main";
-    rev = "7914943074d4edd8b050164edaa409288ee125c1";
-  };
-
-  nativeBuildInputs = [
-    nodejs_22
-    pnpm.configHook
-    vips
-  ];
-
-  pnpmDeps = pnpm.fetchDeps {
-    inherit (final) pname version src;
-    hash = "sha256-rAKwU9RZ+BenNoH60vXBuRpY6qiJkAQsIXVzOCjZ6xQ=";
-  };
-
-  buildPhase = ''
-    export HOME=$PWD
-    pnpm config set store-dir ${final.pnpmDeps}
-    pnpm i --offline
-    pnpm build
-  '';
-
-  installPhase = ''
-    mkdir -p $out
-    cp -r dist/ $out/
-  '';
-})
-```
-
-```
-vite v6.2.3 building SSR bundle for production...
-node:events:496
-      throw er; // Unhandled 'error' event
-      ^
-Error: spawn /build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart ENOENT
-    at ChildProcess._handle.onexit (node:internal/child_process:285:19)
-    at onErrorNT (node:internal/child_process:483:16)
-    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
-Emitted 'error' event on ChildProcess instance at:
-    at ChildProcess._handle.onexit (node:internal/child_process:291:12)
-    at onErrorNT (node:internal/child_process:483:16)
-    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
-  errno: -2,
-  code: 'ENOENT',
-  syscall: 'spawn /build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart',
-  path: '/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart',
-  spawnargs: [
-    '/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/sass.snapshot',
-    '--embedded'
-  ]
+  linux_lemote2f =
+    final.linuxManualConfig {
+      inherit (final.linux) src modDirVersion;
+      # https://github.com/NixOS/nixpkgs/pull/302802
+      config = final.read-linux-config ./lemote2f_config;
+      version = "${final.linux.version}-lemote2f";
+      configfile = ./lemote2f_config;
+      kernelPatches = [
+        {
+          name = "ec_kb3310b";
+          patch = (final.fetchpatch {
+            url = "https://github.com/loongson-community/linux-2f/commit/08fda2d6be96684e4753e89fa54c33bb4553f621.patch";
+            hash = "sha256-CRKovOD/tDNptUSPhDnpp8INH6zXIoPmfU29PNYapA8=";
+          });
+        }
+        {
+          name = "yeeloong_laptop";
+          patch = (final.fetchpatch {
+            url = "https://github.com/loongson-community/linux-2f/commit/ad2584dbce931975c4a1219bf4ac8099aaf636c2.patch";
+            hash = "sha256-GB8l1e5Yb3WIuiiiXorBsEKdDAjQdH7kvepkF+Rbjr8=";
+          });
+        }
+      ];
+    };
 }
 ```
 
+可惜的是，dram 并没有在博文中介绍具体的安装过程，也没有提到如何使用这份配置文件，而且这份 Nix 配置已经是近一年前的了，我希望能用上最新的 NixOS unstable 版以享受尽可能新的软件包和配置。接下来我将基于这份配置文件，探索后续的编译和安装流程。
+
+> 这里稍微解释一下几个名词的含义：
+>
+> - Nix：一个声明式的配置和包管理器，可以通过类似上面这样的配置文件去声明一些软件包的配置和编译流程等。
+> - NixOS：默认使用了 Nix 的 Linux 发行版。和 Debian 等发行版不同的是，NixOS 包括网络、内核参数等在内的系统配置均可通过 Nix 进行配置。
+> - NixOS unstable：NixOS 存在两个版本，一个是 unstable 版，滚动更新；另一个是稳定版，每年发行两次。
+> - Nixpkgs：Nix 和 NixOS 背后的软件源，[拥有接近二十万个软件包，可能是世界上拥有软件包数量最多的软件源之一](https://arc.net/l/quote/esighfsz)。
+
+### 更新配置
+
+dram 的 NixOS 配置是用 Nix Flakes 管理的，它提供了类似 JavaScript 世界的 npm 的 `package-lock.json` 文件，名为 `flake.lock`。后者描述了 `flake.nix` 中指定的所有依赖项的具体版本及哈希值，极大地增强了 Nix 的可复现能力。
+
+dram 的 `flake.lock` 文件如下所示。其中，依赖项 `nixpkgs` 的版本号被定在了哈希值为 `ff0dbd94265ac470dda06a657d5fe49de93b4599` 的 commit，它发布于去年 4 月初。理论上，我完全可以保持这个文件不变去编译 NixOS，这样 Nix 在编译时拉取的软件包源码（包括内核）就会和 dram 在去年编译时使用的完全一致，从而不出意外地编译出几乎和他的一样的 NixOS，这就是 Nix 的可复现能力的体现。
+
+```json
+{
+  "nodes": {
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1712439257,
+        "narHash": "sha256-aSpiNepFOMk9932HOax0XwNxbA38GOUVOiXfUVPOrck=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ff0dbd94265ac470dda06a657d5fe49de93b4599",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
 ```
+
+不过，这种可复现性的另一个侧面是：我只能使用那个时间点下的特定版本的软件包，它们的版本相比现在可能会略显老旧了。在 Linux 的世界里，一年并不是一个很长的时间跨度，不过在 Web 前端的世界里，一年的时间足以让某些库连跳几个大版本。
+
+本着从旧不如从新的原则，我打算升级 `nixpkgs` 依赖项到最新版。对于 Nix Flake 文件，我们可以使用下面的命令进行更新，Nix 会联系依赖项的源仓库以确定当前最新的版本（或者 commit 哈希）。至于 Linux 内核，我暂时不打算升级，尽管新的 LTS 版本 6.12 已经于去年年底发布。
+
+```console
+$ nix flake update --flake .
+```
+
+### 编译过程
+
+你或许会问：这个 NixOS 的配置是给搭载龙芯 2F 的笔记本用的，而这款处理器的架构是 MIPS-III，我应该上哪找安装有 Nix 的并且使用 MIPS-III 的系统来编译这份配置呢？这似乎是个先有鸡还是先有蛋的问题。好在前文提到的 dram 通过交叉编译解决了这个问题，他在 NixOS 配置中给 nixpkgs 声明了下面的交叉编译配置。
+
+> 交叉编译能够让编译器在一种架构的机器上编译另一种架构的机器的程序。特别地，当目标架构的机器性能低下时，我们也可以在性能强劲的机器上通过交叉编译给目标架构的机器编译软件。
+
+```nix
+{
+  legacyPackages = eachSystem (system:
+    import nixpkgs {
+      inherit system;
+      crossSystem = {
+        # 这项配置会被 nixpkgs 用来判断当前系统所处的平台
+        # 不同的平台可能导致某些软件包的编译选项被开启或关闭等
+        config = "mips64el-unknown-linux-gnuabi64";
+
+        # 这项配置会被 Nix 用来配置 Linux 内核生成相应的头文件
+        # 用于编译一些依赖特定内核头文件的程序，例如 strace
+        linux-kernel = {
+          name = "lemote2f";
+          target = "vmlinuz";
+          baseConfig = "lemote2f_defconfig";
+          autoModules = false;
+        };
+
+        # 这项配置会被 Nix 传递给 GCC
+        # GCC 会使用这些配置决定编译时产生的汇编格式以及指令集等
+        gcc = {
+          arch = "loongson2f";
+          float = "hard";
+          abi = "64";
+        };
+
+        # 针对龙芯 2F 处理器的 QEMU 配置
+        # 在交叉编译中，难免会遇到一些软件包要求必须运行一些只有在目标平台上才能运行的二进制文件
+        # 此时 Nix 就会使用这样的 QEMU 模拟器去模拟运行这些二进制文件
+        emulator = pkgs:
+          let
+            mips64el = pkgs.lib.systems.elaborate pkgs.lib.systems.examples.mips64el-linux-gnuabi64;
+            qemu-user = mips64el.emulator pkgs;
+            qemu-user-wrapped = pkgs.writeShellScriptBin "qemu-mips64el-loongson2f" ''
+              exec "${qemu-user}" -cpu Loongson-2F "$@"
+            '';
+          in
+            "${qemu-user-wrapped}/bin/qemu-mips64el-loongson2f";
+      };
+    });
+}
+```
+
+需要注意的是，MIPS 在 nixpkgs 上得到的支持有限。[在一份 2019 年的 RFC 文件中，它的支持等级被归为 Tier 3](https://github.com/NixOS/rfcs/blob/master/rfcs/0046-platform-support-tiers.md)，意味着它的编译工具链和 nixpkgs 中比较流行的包一般可以工作，但不排除会有一些不太流行的包会出现编译失败的问题。我们很快就会看到，这个 RFC 文件的说明在今天看来已经严重失真了，我们很容易在 MIPS-III 架构上踩到编译问题。
+
+> 或许这不能怪 NixOS。一般来说，人们现在在提到 MIPS 架构时，指的都会是更加现代的 MIPS64 Release 2 架构（即 `mips64r2`），人们所做的编译和测试工作（如果有的话）也只会针对这个更新的架构。在 2025 年的今天，除了龙芯以外似乎已经没有厂商在做兼容 MIPS 架构的桌面处理器了。
+
+接下来，我在[搭载 Intel Core i7-12700T 的主机](/hardware#theresa)上使用下面的命令开始编译修改后的 NixOS 配置。命令中的 `sakimi` 来自于配置中设置的表达式 `self.nixosConfigurations.sakimi.config.system.build.toplevel`（下文简称 `toplevel`），我们在之后会介绍这个东西到底是什么。
+
+```console
+$ nix build .#sakimi -v --show-trace --keep-failed
+```
+
+接下来，我遇到了一连串令人吐血的编译报错，这里不再讲述具体的排错过程，我将直接列出问题描述和我的解决方法。
+
+- `missing .../example/systemd/system/systemd-hibernate-clear.service`
+
+  systemd 在安装时报错，提示找不到它内置的一些 service 定义文件。经过调查，问题原因是 nixpkgs 对 systemd 的编译配置存在问题，会在没有启用 UEFI 的情况下错误地让 systemd 认为它开启了依赖于 EFI 的 hibernate 功能，所以尝试去寻找一个不存在的定义文件。
+
+  > 我们的龙芯 2F 笔记本当然不支持 UEFI，它使用的是一种叫做 PMON 的 bootloader，下文会介绍这个东西是什么。
+  
+  我的解决方式是通过 nixpkgs 暴露的配置项手动禁用这些 service 定义文件：
+
+  ```nix
+  {
+    systemd.suppressedSystemUnits = [
+      "systemd-pcrlock@.service"
+      "systemd-pcrlock.socket"
+      "systemd-hibernate-clear.service"
+      "systemd-bootctl@.service"
+      "systemd-bootctl.socket"
+    ];
+  }
+  ```
+
+- **Rust 编译失败**
+
+  主要是类似下面日志里的链接器报错，实质上都是 `failed to merge target specific data of file ... linking mips:isa64r2 module with previous mips:loongson_2f modules`。
+
+  ```log
+  ...
+  /nix/store/is4agswaipkc5x3w97wiaxqsnn0k6kb0-mips64el-unknown-linux-gnuabi64-binutils-2.43.1/bin/mips64el-unknown-linux-gnuabi64-ld: failed to merge target specific data of file /build/rustc-1.85.0-src/build/x86_64-unknown-linux-gnu/stage1-std/mips64el-unknown-linux-gnuabi64/release/deps/libcompiler_builtins-d487f9d2ce75f8aa.rlib(compiler_builtins-d487f9d2ce75f8aa.compiler_builtins.160b42693cb78c45-cgu.07.rcgu.o)
+  /nix/store/is4agswaipkc5x3w97wiaxqsnn0k6kb0-mips64el-unknown-linux-gnuabi64-binutils-2.43.1/bin/mips64el-unknown-linux-gnuabi64-ld: /build/rustc-1.85.0-src/build/x86_64-unknown-linux-gnu/stage1-std/mips64el-unknown-linux-gnuabi64/release/deps/libcompiler_builtins-d487f9d2ce75f8aa.rlib(compiler_builtins-d487f9d2ce75f8aa.compiler_builtins.160b42693cb78c45-cgu.08.rcgu.o): linking mips:isa64r2 module with previous mips:loongson_2f modules
+  /nix/store/is4agswaipkc5x3w97wiaxqsnn0k6kb0-mips64el-unknown-linux-gnuabi64-binutils-2.43.1/bin/mips64el-unknown-linux-gnuabi64-ld: failed to merge target specific data of file /build/rustc-1.85.0-src/build/x86_64-unknown-linux-gnu/stage1-std/mips64el-unknown-linux-gnuabi64/release/deps/libcompiler_builtins-d487f9d2ce75f8aa.rlib(compiler_builtins-d487f9d2ce75f8aa.compiler_builtins.160b42693cb78c45-cgu.08.rcgu.o)
+  /nix/store/is4agswaipkc5x3w97wiaxqsnn0k6kb0-mips64el-unknown-linux-gnuabi64-binutils-2.43.1/bin/mips64el-unknown-linux-gnuabi64-ld: /build/rustc-1.85.0-src/build/x86_64-unknown-linux-gnu/stage1-std/mips64el-unknown-linux-gnuabi64/release/deps/libcompiler_builtins-d487f9d2ce75f8aa.rlib(compiler_builtins-d487f9d2ce75f8aa.compiler_builtins.160b42693cb78c45-cgu.09.rcgu.o): linking mips:isa64r2 module with previous mips:loongson_2f modules
+  /nix/store/is4agswaipkc5x3w97wiaxqsnn0k6kb0-mips64el-unknown-linux-gnuabi64-binutils-2.43.1/bin/mips64el-unknown-linux-gnuabi64-ld: failed to merge target specific data of file /build/rustc-1.85.0-src/build/x86_64-unknown-linux-gnu/stage1-std/mips64el-unknown-linux-gnuabi64/release/deps/libcompiler_builtins-d487f9d2ce75f8aa.rlib(compiler_builtins-d487f9d2ce75f8aa.compiler_builtins.160b42693cb78c45-cgu.09.rcgu.o)
+  collect2: error: ld returned 1 exit status
+  ```
+
+  问题原因是我们在 NixOS 配置中给 GCC 配置的 `arch = "loongson2f"` 和 Rust 自己的配置不同，Rust 官方支持的 MIPS 架构指的其实是 MIPS64 Release 2。根据 [wangjiezhe 的博文](https://arc.net/l/quote/ebyumclw)，我们应该需要对 Rust 源码打上下面的补丁，不过我发现 nixpkgs 里对 Rust 源码的处理方式有些复杂，一时竟找不到有效的方式在 NixOS 配置文件中声明这个补丁。
+
+  ```diff
+  diff --git a/compiler/rustc_target/src/spec/targets/mips64el_unknown_linux_gnuabi64.rs b/compiler/rustc_target/src/spec/targets/mips64el_unknown_linux_gnuabi64.rs
+  index 515473fbabc..fa3c6875964 100644
+  --- a/compiler/rustc_target/src/spec/targets/mips64el_unknown_linux_gnuabi64.rs
+  +++ b/compiler/rustc_target/src/spec/targets/mips64el_unknown_linux_gnuabi64.rs
+  @@ -15,8 +15,8 @@ pub fn target() -> Target {
+          options: TargetOptions {
+              abi: "abi64".into(),
+              // NOTE(mips64r2) matches C toolchain
+  -            cpu: "mips64r2".into(),
+  -            features: "+mips64r2,+xgot".into(),
+  +            cpu: "mips3".into(),
+  +            features: "+mips3,+xgot".into(),
+              max_atomic_width: Some(64),
+              mcount: "_mcount".into(),
+  ```
+
+  我还有一个选择是弄清楚到底是哪个软件包依赖了 Rust，然后在 NixOS 配置中卸载这个软件包。通过 `nix-store -qR` 命令，我最终发现是 NixOS 自己的 [nixos-rebuild-ng](https://discourse.nixos.org/t/nixos-rebuild-ng-a-nixos-rebuild-rewrite/55606) 依赖了 Rust（因为它本身就是个 Rust 项目）。这个程序是 NixOS 的核心程序，负责构建系统配置并使其生效。它是去年年底才成为 NixOS 默认项的，在那之前 NixOS 使用的是 Perl 写的老版本。
+
+  看来，我只能通过 [`system.switch.enableNg = false`](https://github.com/NixOS/nixpkgs/blob/5e5402ecbcb27af32284d4a62553c019a3a49ea6/nixos/modules/system/activation/switchable-system.nix#L32) 临时回退到老版本了。Nix 会警告说这个老版本会在 NixOS 25.05 正式发布时被移除，那么之后再更新这个 NixOS 配置时我必须解决 Rust 的编译问题。
+
+- **systemd 因 pcre2 动态库而编译失败**
+
+  原始问题是 Nix 在编译完 systemd 之后，在扫描 systemd 二进制的动态库依赖时，发现 pcre2 动态库文件不存在。这个现象违背了 Nix 的规定：声明的动态库依赖必须实际存在于文件系统。**这是我本次给龙芯 2F 编译 NixOS 遇到的最为狗血的报错。**
+
+  我最终定位到问题的原因是：当前 nixpkgs 中的 pcre2 版本是 10.44，其作者在释出源码时使用的 libtool 版本存在 bug，会导致生成的 configure 脚本在 MIPS 构建下无法正常产生动态库文件。而最为坑爹的是，在这种情况下 configure 脚本竟然只是默默地失败（退出码为 0，和成功执行一样），pcre2 整体的编译流程仍然被 Nix 视为成功。
+
+  [libtool 的这个 bug 已经被修复](https://git.savannah.gnu.org/cgit/libtool.git/commit/?id=9a4a02615c9e7cbcfd690ed31874822a7d6aaea2)，并且我发现 pcre2 作者发布的 10.45 源码已经不存在这个问题，不过 [nixpkgs 里对应的升级 PR 似乎被相关维护者持保留意见](https://github.com/NixOS/nixpkgs/pull/379618)。总之，我暂时使用 overlay 的方式将 nixpkgs 里的 pcre2 升级到 10.45：
+
+  > overlay 是 Nix 中的另一个强大功能，它可以让我们只替换 nixpkgs 中的特定软件包，方便我们根据自己的需要调整一些软件包的编译选项、打上一些补丁，以及像我现在这样临时升级。
+  >
+  > 这样并不会破坏 Nix 构建的可复现性，正如我在新版本源码链接下面附带了一个哈希值，Nix 会通过这个哈希值来确保前后两次构建时下载的源码保持不变。
+
+  ```nix
+  {
+    pcre2 =
+      let
+        version = "10.45";
+      in
+      prev.pcre2.overrideAttrs (old: {
+        inherit version;
+        src = final.fetchurl {
+          url = "https://github.com/PhilipHazel/pcre2/releases/download/pcre2-${version}/pcre2-${version}.tar.bz2";
+          hash = "sha256-IVR/NRYSDHVZflswqZLielkqMZULUUDnuL/ePxkgM8Q=";
+        };
+      });
+  }
+  ```
+
+- **`glib-introspection` 编译失败**
+
+  这是我本次遇到的最难以理解的报错，具体的报错日志我没有留档，因为似乎并没有一个固定的报错输出。
+  
+  问题的表现是一些开启了对 `glib-introspection` 支持的库（包括 `glib`、`gdk-pixbuf`、`json-glib` 等）在编译相关文件时，QEMU 模拟器会出现 `Illegal instruction (core dumped)` 的报错。具体原因实在无法理解，我只好将这些库的 `glib-introspection` 支持通过 overlay 的手段暂时关闭：
+
+  ```nix
+  {
+    glib = prev.glib.override (_: {
+      withIntrospection = false;
+    });
+    gdk-pixbuf = prev.gdk-pixbuf.override (_: {
+      withIntrospection = false;
+    });
+    json-glib = prev.json-glib.override (_: {
+      withIntrospection = false;
+    });
+    harfbuzz = prev.harfbuzz.override (_: {
+      withIntrospection = false;
+    });
+    pango = prev.pango.override (_: {
+      withIntrospection = false;
+    });
+  }
+  ```
+
+解决这些问题之后，我总算成功编译出了 NixOS……吗？我们编译的 `sakimi` 在 Nix 的概念里叫做表达式，它指向 `toplevel`，这是什么东西呢？我们先来看看 Nix 在当前文件夹创建的软链接，它指向了我们得到的「编译产物」：
+
+```console
+$ ls result
+activate               boot.json     extra-dependencies  init-interface-version  kernel-modules  specialisation  systemd
+append-initrd-secrets  dry-activate  firmware            initrd                  kernel-params   sw
+bin                    etc           init                kernel                  nixos-version   system
+```
+
+这个文件夹看上去包含一些我们平常在 Linux 的根目录下看到的东西，例如 `bin` 和 `etc`。我们也能看到 Linux 内核的相关文件，包括内核镜像 `kernel` 和 initramfs `initrd`。事实上，我们得到的内容的确是完整的 NixOS 系统，但是并没有处于一种我们想要的「组织形式」。我们会在下一节介绍如何把这个 NixOS 系统部署到逸珑笔记本上。
+
+## 部署 NixOS
+
+在实际开始部署 NixOS 前，我们得先弄清楚到底应该部署什么文件。换个角度说，我们应该怎么组织前一节得到的文件，从而能够让我们在按下笔记本的开机键之后顺利进入 NixOS。
+
+### NixOS 的文件组织方式
+
+类似其它 Linux 发行版，NixOS 系统上的文件也分为两个部分：启动文件和根目录文件，一般分别位于硬盘上的启动分区和根文件分区。前者主要由内核镜像、initramfs 和 bootloader 构成；后者主要由 Nix Store 构成，它是位于 `/nix/store` 下的文件仓库。NixOS 和其它 Linux 发行版的一个显著差异是：前者*不完全*遵循 [FHS 规范](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard)，NixOS 不会在根目录下提供类似其它发行版那样的 `/bin`、`/usr`、`/lib` 等文件夹。NixOS 的绝大多数文件都位于 Nix Store 这个文件仓库中（一般位于 `/nix/store`）。
+
+当我们登入一个运行中的 NixOS 实例时，我们运行的 bash 程序来自于 `/run/current-system/sw/bin` 文件夹，其中也包含系统上安装的大量程序，但都是以软链接的形式存在。例如 `/run/current-system/sw/bin/bash` 就是一个指向 Nix Store 的软链接，如下面所示。
+
+```console
+$ ls /run/current-system/sw/bin -al | grep bash
+lrwxrwxrwx 1 root root    76 Jan  1  1970 bash -> /nix/store/4k90qpzh1a4sldhnf7cxwkm9c0agq4fp-bash-interactive-5.2p37/bin/bash
+lrwxrwxrwx 1 root root    79 Jan  1  1970 bashbug -> /nix/store/4k90qpzh1a4sldhnf7cxwkm9c0agq4fp-bash-interactive-5.2p37/bin/bashbug
+lrwxrwxrwx 1 root root    74 Jan  1  1970 sh -> /nix/store/4k90qpzh1a4sldhnf7cxwkm9c0agq4fp-bash-interactive-5.2p37/bin/sh
+```
+
+这里引出了 NixOS 的另一大核心功能：Generation（代）。当我们对系统作出任何改变（包括修改配置、增减软件包等）时，NixOS 会形成并切换到一个新的「代」，例如在第一代作出改变之后产生了第二代。如果新的一代出现了预料外的状况，比如更新后的软件出现了崩溃问题，那么我们可以直接切换回没有问题的上一代。在 NixOS 中，这种回滚操作并不像其它传统 Linux 发行版那样是以软件包为粒度的，而是以整个系统为粒度：包括软件包、相关配置文件甚至内核模块在内的各种事物都会被回滚。
+
+这就解释了为什么 `/run/current-system/sw/bin` 存储的是一堆软链接而不是二进制程序本身。当我们切换不同的「代」时，实际上就是在对 Nix Store 以外的一些相关的软链接进行更新操作。例如将 `/run/current-system/sw/bin/bash` 指向 Nix Store 里不同版本的 bash。因此，对 NixOS 来说根目录下最重要的文件夹是 `/nix/store`。我们很快就会看到，NixOS 在启动时实际上只要求根目录下存在 Nix Store，其它必要的文件和文件夹都会被动态地构建出来。
+
+NixOS 的启动文件则和其它发行版没有明显差异，唯一要提一下的是：我们不需要像在 x86 平台上安装 grub 那样，在启动文件中准备一个 bootloader。因为逸珑笔记本使用的是一种叫做 PMON 的 BIOS，它兼具 bootloader 的功能。我们之后会看到，可以在启动分区中准备一份 `boot.cfg` 文件来告诉 PMON 它应该加载并运行哪个内核镜像，以及 initramfs 是哪个文件，还有应该给内核传什么参数。
+
+> 有关本节内容的更多细节，可以阅读 Linus Heckemann 的 [How can I boot NixOS? Let me count the ways...](https://linus.schreibt.jetzt/posts/booting-nixos.html)，这篇文章详细介绍了 NixOS 的启动过程。前文提到的 `toplevel` 其实被人们称为 system package。
+
+### 制作系统镜像
+
+接下来我们会基于上面的理解给逸珑笔记本制作 NixOS 的系统镜像。我们这里使用了 [NixOS 生成 SD 卡安装镜像时所依赖的 `make-ext4-fs.nix` 文件](https://github.com/NixOS/nixpkgs/blob/master/nixos/lib/make-ext4-fs.nix)，我们把 `toplevel` 传给它，它就能把其中的 Nix Store 中的所有文件写入到 ext4 文件系统的镜像中，这就完成了根目录文件系统的准备。
+
+dram 的 NixOS 配置仓库中提供了一个维护启动分区的脚本，阅读其中的逻辑我明白了启动分区的组织形式：
+
+- `nixos/xxx-kernel`
+
+  内核镜像文件，`xxx` 代表脚本赋予的前缀名。
+
+- `nixos/xxx-initrd`
+
+  initramfs 文件，`xxx` 代表脚本赋予的前缀名。
+
+- `boot.cfg`
+
+  给 PMON 使用，描述启动项列表，形式如下面的例子所示：
+
+  ```plain
+  title NixOS
+    root (wd0,0)
+    kernel nixos/xxx-kernel
+    initrd nixos/xxx-initrd
+    args init=/nix/store/xxx-init
+  ```
+
+  - `title`：启动项的标题，会展示在启动菜单上。
+  - `root`：内核镜像和 initramfs 文件位于的根目录路径。`(wd0,0)` 似乎表示第一块硬盘。
+  - `kernel`：内核镜像文件的路径。
+  - `initrd`：initramfs 文件的路径。
+  - `args`：传递给内核的参数，这里 `init` 的值正是内核启动完成后启动的第一个程序的路径。对于 NixOS，这个特殊的 init 程序（仍然位于 Nix Store）会基于当前系统的「代」以及 Nix Store 构建出完整的根目录系统。
+
+因此，我们可以准备一个空文件夹并调用这个脚本，让它把相关的内核镜像和 initramfs 文件，以及 `boot.cfg` 文件部署到空文件夹中，然后将这个空文件夹写入一个 ext2 文件系统镜像中（PMON 支持 fat 和 ext2 文件系统作为启动分区），再将和前面得到的根文件系统镜像一起写入一个新的带分区表的镜像文件中。这样，我们就得到了可以直接通过 `dd` 写到逸珑笔记本硬盘里的系统镜像。
+
+准备系统镜像的 Nix 文件如下所示，其中 `build-image.sh` 脚本的内容这里不贴出来了，它做的事情和上面所说的类似。我这里使用了 [`genext2fs`](https://github.com/bestouff/genext2fs) 这个非常好用的工具，它可以在不需要 root 权限的情况下直接从一个文件夹中创建对应的 ext2 文件镜像。
+
+```nix
+{
+  system.build.image =
+    let
+      storeDir = builtins.storeDir;
+      topLevel = config.system.build.toplevel;
+      # 启动分区大小。
+      bootSizeMiB = 200;
+      # 根文件分区大小
+      # 这里我原本设定的大小是 1400，因为笔记本自带的 SSD 大小只有 2 GiB，但是出现了后文会介绍的问题
+      rootSizeMiB = 6000;
+      bootLabel = bootPartitionLabel;
+      rootLabel = rootPartitionLabel;
+      rootImage = pkgs.callPackage "${toString modulesPath}/../lib/make-ext4-fs.nix" {
+        storePaths = [ topLevel ];
+        volumeLabel = rootLabel;
+      };
+      outputImage = "nixos-loongson-2f.img";
+    in
+    pkgs.stdenv.mkDerivation {
+      name = outputImage;
+      builder = ./build-image.sh;
+
+      nativeBuildInputs = with pkgs; [
+        pmon-boot-cfg
+        util-linux
+        genext2fs
+      ];
+
+      inherit
+        storeDir
+        topLevel
+        rootImage
+        bootSizeMiB
+        rootSizeMiB
+        bootLabel
+        outputImage
+        ;
+    };
+}
+```
+
+### 部署系统镜像
+
+现在，我们要将得到的系统镜像文件通过刷写到逸珑笔记本的硬盘上，这应该只能通过下面的方式进行：
+
+- **把硬盘拆下来，接到其它电脑上刷写**
+
+  并不可行，这台笔记本的硬盘使用的是 2.5 英寸的 IDE 接口，我没有其它支持这种设备的机器。
+
+  <BlogImage filePath="running-my-blog-on-loongson-2f/disk" caption="逸珑笔记本自带的 2G SSD，使用 2.5 英寸 IDE 接口" />
+
+- **在笔记本上直接刷写**
+
+  我认为应该不能运行硬盘上的原装系统并在上面刷写硬盘，担心会发生一些奇妙的数据问题。幸好 [Druggo Yang 在去年基于 Linux 6.6.21 内核和 Gentoo 制作了一份网络启动镜像](https://blog.druggo.org/post/2024/05/19/%E6%8A%8A%E5%8D%9A%E5%AE%A2%E6%90%AC%E5%88%B0%E9%BE%99%E8%8A%AF%E7%AC%94%E8%AE%B0%E6%9C%AC%28yeeloong%29%E4%B8%8A%E4%BA%86)，可以直接在 PMON 上加载并执行。我们应该可以通过这个系统对硬盘进行刷写，因为它本身不存在于硬盘上。
+
+  > Linux 的网络启动镜像有点类似于 Windows 世界的 PE，是一个最小化的系统，安装有一些常用的系统维护工具。Druggo Yang 制作的这个镜像大小仅有 5.8 MiB。
+
+根据 [wangjiezhe 的指南](https://wangjiezhe.com/posts/2024-07-18-Install-Gentoo-on-Lemote-Yeeloong-netbook/)，我在自己的机器搭建好 TFTP 服务器之后，启动逸珑笔记本输入下面的命令加载并成功启动了网络启动镜像：
+
+```console
+PMON> ifaddr rtl0 10.0.0.233
+PMON> load tftp://10.0.0.20/netboot-yeeloong.img
+PMON> g
+```
+
+进入系统之后，我使用 `dd` 和 `nc` 命令通过网络传输到自己的机器上完成了对原硬盘内容（也就是原装系统）的备份。然后，我使用 `fdisk` 删除了硬盘上的所有分区，最后通过 `dd` 写入了准备好的 NixOS 安装镜像。这时，我重启之后就能在 PMON 的启动菜单上看到 NixOS 了。
+
+<BlogImage filePath="running-my-blog-on-loongson-2f/pmon" caption="PMON 的启动菜单" />
+
+然而，当我按下回车启动系统之后，等待我的是漫长的黑屏，绝对是哪里又出了问题。我重启系统，通过手动输入 `boot.cfg` 里的 `root`、`kernel` 等命令来启动系统，在输入 `g` 启动之后，发现 PMON 输出了一段晦涩的报错日志。
+
+> 前面提到的 `boot.cfg` 文件中的各个配置项（如 `root`、`kernel` 等）恰好也是 PMON 命令行所支持的命令，参见[龙芯PMON基本命令总结](https://wuxiangyixin.com/index.php?c=show&id=25)。
+
+这次的我比较幸运，很快找到了解决问题的线索：[kusahae 在知乎上的文章](https://zhuanlan.zhihu.com/p/359628282)提到：「Debian Wheezy 的 netboot 无论如何都起不来，检查发现前机主入手后没有升级过固件，遂升级。」看上去他也遇到了和我类似的问题。我在根据指示升级了笔记本的 EC 固件和 PMON 之后，问题解决，我终于成功启动了 NixOS……吗？
+
+当 Linux 开始往屏幕上打印启动日志时，我很快注意到了一些 `no space left on device` 的字样，提示 Linux 内核无法创建 `/proc` 等文件夹。Linux 最终以 kernel panic 的姿势倒在了 stage 1（即正式运行 NixOS 的 `init` 程序之前的阶段）。我再次重启进入上述的网络镜像，发现系统内置的 SSD 并没有被占满，还有几百兆的空间。具体的原因我没有深究，或许是 ext4 文件系统的空闲 inode 已经被耗尽了，总之我打算给这台笔记本换一块更大的硬盘，顺便也尝试升级一下原装的 512 MiB 内存。没想到我这里也踩了好几个坑。
+
+对于内存，龙芯 2F 似乎不支持 1 GiB 以上容量的 DDR2 内存，即使频率和笔记本自带的 512 MiB 内存都是 667 MHz。对于硬盘，我购买的 mSATA 转 IDE 的转接卡似乎无法被笔记本识别，也许是我插反了接口（这该死的 IDE 接口没有提供强制的区分正反的方法），但这张转接卡反过来时因为高度的原因无法插入笔记本的插槽。
+
+<BlogImage filePath="running-my-blog-on-loongson-2f/disk2" caption="mSATA 转 IDE 的转接卡，上面插着一块 mSATA 固态硬盘" />
+
+kusahae 的分享里提到它使用 CF 卡作为硬盘，于是我又购买了一张闪迪的 16 GiB CF 卡，一张 TF 转 CF 的适配卡备用。为了方便，我还购买了一个 USB 3.0 的 CF 读卡器，这样就能直接在我的机器上刷写 NixOS 系统镜像。
+
+然而，直到 CF 卡到手之后我才发现它的尺寸比预想中大很多，以至于插不进笔记本侧边的卡槽（我至今也不清楚这个卡槽究竟是什么规格），这时我才发现自己可能误解了 kusahae 的意思，他也许是使用了一张 CF 转 IDE 转接卡来插到笔记本背面的 IDE 插槽，于是我又购买了一张转接卡。正如他帖子下的一个评论所说，「用这个机器极其需要耐心」。
+
+经过测试，闪迪的 CF 卡插上后仍然无法被笔记本识别，而 TF 转 CF 的适配卡却能被正常识别。我最终选择了一张原本用于我的[香橙派 3B 单板机](http://www.orangepi.cn/html/hardWare/computerAndMicrocontrollers/details/Orange-Pi-3B.html)的闪迪 TF 卡，通过适配卡将其安装到笔记本上并刷写了 NixOS 镜像
+
+<BlogImage filePath="running-my-blog-on-loongson-2f/disk3" caption="闪迪 CF 卡通过转接卡接到笔记本背后的 IDE 插槽，旁边是我购买的 1 GiB 创见内存" />
+<BlogImage filePath="running-my-blog-on-loongson-2f/disk4" caption="我最终作为硬盘使用的 TF 转 CF 适配卡" />
+
+至此，笔记本开机之后顺利进入了 NixOS 系统，如下图所示。龙芯 2F 的性能感觉还是有点过于前现代了，我从来没有见过开机这么慢的 Linux，哪怕我的 NixOS 的配置实际上已经精简了很多系统组件。你还可以从图中看到，此时系统内存占用只有不到 100 MiB。至此，我们在这台近二十年前发布的笔记本上成功运行了现代的 Linux 内核以及 NixOS，尽管 nixpkgs 中许多其它软件目前无法正常编译（例如 `fastfetch`）。
+
+<BlogImage filePath="running-my-blog-on-loongson-2f/screenshot" />
+
+## 迁移博客框架
+
+### 关于 React 和 Waku
+
+本博客使用的是 [Waku 框架](https://waku.gg/)，一个基于 React 的 SSR/SSG 框架，支持最新的 React 19 的各种功能，当然也包括从 React 18 就逐渐引入的 Server Components，能够让开发者以组件级别的粒度控制网页上的哪些部分使 SSG，以及哪些部分使用 SSR，从而降低页面的渲染耗时，也能减少所需的网络传输数据量。为了能说清楚本博客目前使用的框架原理，以及之后的具体迁移过程，接下来我会介绍一些现代的前端概念。
+
+> 这里涉及到一些前端概念：
+>
+> - SSG 是 Static Site Generation（静态资源生成）的缩写，指的是服务端在客户端请求之前就准备好了页面的内容，并且对不同的客户端返回的都是同一份内容。
+> - SSR 是 Server-Side Rendering（服务端渲染）的缩写，指的是服务端在客户端请求时动态生成页面内容，向客户端直接传输渲染出来的 HTML 标签。
+> - CSR 是 Client-Side Rendering（客户端渲染）的缩写，指在客户端（浏览器）上运行 JavaScript 逻辑，从服务端拉取各种数据，最终生成 HTML 标签内容渲染到浏览器上。
+>
+> 我们可以通过一个简单的方法区分这些渲染方式的差异：内容的计算发生在何时何地。如果发生在请求之前，那么它就是 SSG；如果发生在请求时的服务端，那么它就是 SSR；如果发生在请求时的客户端，那么它就是 CSR。
+
+本博客页面上的大部分内容，特别是文章正文（除了图片以外），都是使用 SSG 渲染的，因此你应该会感到网页从请求到渲染到屏幕上的速度非常快，而文章正文中的图片组件使用了 SSR。使用 SSR 的原因是需要让它承载 JavaScript 逻辑。
+
+在 React 18 等现代框架中，SSR 一般会和 CSR 捆绑在一起。当某个组件的 HTML 标签在服务端被计算出来之后，它会被马上传输到客户端进行渲染。但是渲染完成之后，客户端还会通过 JavaScript 逻辑（下面简称「JS 逻辑」）进行一次 CSR 渲染。这整个过程叫做注水（hydration，一些人也称为水合）。
+
+注水对于一些需要在客户端（也就是浏览器）上执行 JS 逻辑的组件来说是必要的。你也许会发现，在鼠标点击文章正文的图片之后，它会被放大到全屏展示。这里正是 JS 逻辑在发挥作用，它监听了图片元素的鼠标点击事件。在服务端通过 SSR 渲染图片元素并将 HTML 传给浏览器时，客户端并不知道这个元素存在一个监听器，但是客户端知道它长什么样子（毕竟这正是 HTML 做的事情），因此用户能够第一时间看到图片，却并不能第一时间交互。直到马上发生的 CSR 渲染之后，监听器才会被 JS 逻辑注册到浏览器上。虽然这次渲染出来的内容一般会和 SSR 得到的一样，但是此时的图片元素已经是一个有血有肉的组件了。
+
+SSR 让我们既能享受到 SSG 带来的快速的首屏渲染，也能在客户端上运行 JavaScript 逻辑。近年来，包括 React 在内的各种前端框架，可以说几乎都在朝着同一个方向努力：让开发者更自由、更便捷地控制页面上不同部分、组件或元素的渲染方式，从而实现更快、更好的用户体验。
+
+> Waku 也是一个这样的框架，它基于 React 打造，功能简单有效。它的作者 [Daishi Kato](https://github.com/dai-shi) 来自日本，是 JavaScript 三种现代的、主流的状态管理方案 zustand、jotai 和 valtio 的主要作者。有趣的是，[这三种方案的核心思想是截然不同的](https://zustand.docs.pmnd.rs/getting-started/comparison)，尽管都是用来解决状态管理问题。
+
+### 构建 JavaScript 运行时
+
+如果提到「在服务器上运行 JavaScript」，很多人第一时间会想到 Node.js。基于一直以来的惯性，我起初也认为 Waku 是在 Node.js 上运行的。之后，我发现 Node.js 依赖的 V8 引擎似乎[从 2019 年开始就逐渐抛弃对 MIPS 架构的支持了](https://github.com/nodejs/node/issues/26179)。就连对一众基于 MIPS 对路由器有着良好支持的 OpenWRT，[它的软件源里的 Node.js 版本也停留在了老旧的 v16](https://openwrt.org/packages/pkgdata/node)，且似乎只支持一种特定的 MIPS32 架构，我很担心如此老旧的版本是否能运行 Waku。
+
+直到仔细阅读了 Waku 的文档之后，我才了解到一个事实：它并不像我想象的那样需要 Node.js 来运行编译产物。Waku 的部署方式捆绑于 Serverless 厂商（如 [Vercel](https://vercel.com/)、[Netlify](https://www.netlify.com/) 等）：它会直接把编译产物上传到相应厂商的服务器上完成部署。并且，开发者往往不需要在自己的机器上编译项目，可以直接将项目源码上传到厂商的服务器，由厂商完成从拉取源码，到编译再到部署的一条龙服务。
+
+> Serverless 是近年来兴起的新的云服务形态，在这种模式下开发者只需要将精力放在编写前端项目上，云服务商会包办后续的编译和部署环节，开发者一般不需要关心背后的运维工作。这些服务商提供的服务往往还存在这些特点：
+> - 按需付费：例如按每个请求实际发生的 CPU 计算时间进行计费，而不是按服务运行的时间（包含空载）。
+> - 自动伸缩：访问流量增大时自动扩展更多服务实例，减小时则自动缩减。
+
+这些厂商大多为自己的 Serverless 场景定制了各自不同的 JavaScript 运行时（下文简称「运行时」），不必然是 Node.js。因此，我需要的应该是一个能被 Waku 支持的运行时。读到这里，你可能会疑惑，如果不同云厂商几乎都有一套自己实现的运行时，那么这是否会导致像 Waku 这样的框架需要给每一种运行时提供的 API 编写胶水代码。答案是否定的，这些厂商们为了避免这样的麻烦，成立了一个[名为 WinterTC 的组织](https://wintertc.org/)，将一些「服务端 JavaScript 运行时」所应当提供的 API 进行标准化。
+
+> 根据[最新的标准文档](https://min-common-api.proposal.wintertc.org/)，WinterTC 规定所有遵循标准的运行时必须提供诸如 `console`、`setTimeout`、`Request`、`Response` 和 `fetch` 等 API。
+
+Waku 源码中仍然存在对于不同厂商的适配器代码（这些适配器相当于整个项目的入口函数），因为不同厂商的运行时在对静态资源等事物的处理上仍存在差异，而这些差异暂未被标准化。阅读下面 Waku 给 Deno 准备的适配器代码，我们发现 Waku 使用了一种[叫做 Hono 的框架](https://hono.dev/)。这个框架做的事情主要是：在 WinterTC 提供的底层 API 上封装出一个 JavaScript 的后端框架，提供路由、中间件、鉴权、日志等能力。
+
+> [Deno](https://deno.com/) 是 Node.js 原作者 Ryan Dahl 创建的另一个 JavaScript 运行时，它同时也是一个 Serverless 厂商。由于 Deno 和 Node.js 同样使用 V8，我们大概也是没办法让它在 MIPS 平台上运行的。
+
+```js
+// ... 省略了一些代码 ...
+
+// 初始化 Hono 框架
+const createApp = (app) => {
+  // `serveStatic` 是 Hono 提供的中间件，可以提供静态资源服务，向客户端返回开发者的图片、字体等文件
+  // 对于 Waku 来说，这正是 SSG 的实现方式（提前在编译时就生成好对应组件的 HTML）
+  app.use(serveStatic({ root: distDir + '/' + publicDir }));
+
+  // `serveEngine` 是 Waku 的核心逻辑，React Server Component 的 SSR 逻辑包括在其中
+  app.use(serverEngine({ cmd: 'start', loadEntries, env, unstable_onError: new Set() }));
+
+  // 404 的兜底逻辑
+  app.notFound(async (c) => {
+    const file = distDir + '/' + publicDir + '/404.html';
+    try {
+      const info = await Deno.stat(file);
+      if (info.isFile) {
+        c.header('Content-Type', 'text/html; charset=utf-8');
+        return c.body(await Deno.readFile(file), 404);
+      }
+    } catch {}
+    return c.text('404 Not Found', 404);
+  });
+
+  return app;
+};
+
+const honoEnhancer = await loadHonoEnhancer();
+const app = honoEnhancer(createApp)(new Hono());
+
+// 当部署到 Deno 上时，服务商会直接让 Deno 运行时运行这个适配器文件，完成服务的运行
+Deno.serve(app.fetch);
+```
+
+读完 Deno 的适配器代码之后，我判断自己只需要找一个兼容 WinterTC 标准且能够在 MIPS 平台上运行的运行时，然后编写一个适配器，即可成功运行博客。我最终选择了 [txiki.js](https://github.com/saghul/txiki.js)，这是一个基于 [QuickJS-NG](https://github.com/quickjs-ng/quickjs) 引擎且兼容大部分 WinterTC 标准的运行时。
+
+> QuickJS-NG 是 [QuickJS](https://bellard.org/quickjs/) 的改善分支，它们都是使用 C 语言编写的 JavaScript 解释器，不涉及 JIT 编译，因此理论上可以在任何提供 C 语言编译器的平台上运行（例如，我的逸珑笔记本）。QuickJS 的作者 [Fabrice Bellard](https://en.wikipedia.org/wiki/Fabrice_Bellard) 是个极其牛逼的巨佬，是 ffmpeg、QEMU、[TCC](https://en.wikipedia.org/wiki/Tiny_C_Compiler) 等著名开源项目的原作者。真希望我能像他这样直到五十多岁都还在为自己的爱好编程，也希望我能成为像他这样的[狐狸](/articles/i-am-a-fox)。
+
+下面是我给 Waku 编写的针对 txiki.js 适配器的构建代码。它由下面的部分构成：
+
+- 对 Hono 框架提供的 `serveStatic` 中间件的实现。我们需要提供 `isDir`、`getContent` 和 `pathResolve` 函数的实现，为此我使用了 txiki.js 提供的文件系统 API。
+
+  > 这里的设计在一定程度上体现了 JavaScript 运行时和 JavaScript 引擎的不同分工。前者主要提供一些围绕 JavaScript 逻辑的 I/O API，例如和系统的文件系统交互。后者则关注语言本身的 API，例如 `Promise`、`Date` 等。
+
+- 对 Hono 框架的初始化，这里类似上面 Deno 的代码。
+- 玩具级别的 HTTP 服务器实现，它监听 txiki.js 提供的 TCP 套接字，然后从中读取并解析 HTTP 请求头，再把 `Request` 对象构造出来输入给 Hono 框架。最终，我们将 Hono 框架的响应（来自 Waku）发给客户端。
+
+  > 这里并没有将 HTTP 请求体的内容传递给 Hono，可能会导致 POST 和 PUT 之类的请求无法正常工作，不过我的博客暂时不会让客户端产生这些请求。或许我应该用一个标准的 HTTP 解析器实现，现在这个实现说不定存在安全漏洞。
+
+```ts
+// ... 省略一些代码 ...
+
+const serveStatic = (c, next) => {
+  const isDir = async (path) => {
+    try {
+      const stat = await tjs.stat(path);
+      return stat.isDirectory;
+    } catch {
+      return undefined;
+    }
+  };
+  const getContent = async (path) => {
+    try {
+      if (await isDir(path)) {
+        return null;
+      }
+      const handle = await tjs.open(path, "r");
+      return handle.readable;
+    } catch {
+      return null;
+    }
+  };
+  const pathResolve = (path) => {
+    return path.startsWith('/') ? path : './' + path;
+  };
+  return baseServeStatic({
+    isDir,
+    getContent,
+    pathResolve,
+    root: distDir + '/' + publicDir
+  })(c, next);
+}
+
+const createApp = (app) => {
+  app.use(serveStatic);
+  app.use(serverEngine({ cmd: 'start', loadEntries, env, unstable_onError: new Set() }));
+  app.notFound(async (c) => {
+    const file = distDir + '/' + publicDir + '/404.html';
+    try {
+      const info = await tjs.stat(file);
+      if (info.isFile) {
+        c.header('Content-Type', 'text/html; charset=utf-8');
+        return c.body(await tjs.readFile(file), 404);
+      }
+    } catch {}
+    return c.text('404 Not Found', 404);
+  });
+  return app;
+};
+
+const HONO_ENHANCER = (await configPromise).unstable_honoEnhancer || ((createApp) => createApp);
+const HONO_APP = HONO_ENHANCER(createApp)(new Hono());
+
+const ENCODER = new TextEncoder();
+const ENCODED_NEWLINE = ENCODER.encode("\r\n");
+const ENCODED_CHUNK_END = ENCODER.encode("0\r\n\r\n");
+
+const handleConnection = async (listener, connection) => {
+  const buf = new Uint8Array(1024);
+  await connection.read(buf);
+  const requestString = ffi.bufferToString(buf);
+  const requestLines = requestString.split("\r\n");
+  const requestLine = requestLines[0].split(" ");
+  const headers = {};
+  for (let i = 1; i < requestLines.length; i++) {
+    const line = requestLines[i];
+    if (!line) {
+      continue;
+    }
+
+    const index = line.indexOf(": ");
+    if (index < 0) {
+      continue;
+    }
+
+    const key = line.slice(0, index);
+    const value = line.slice(index + 2);
+    headers[key] = value;
+  }
+
+  const method = requestLine[0];
+  const path = requestLine[1];
+  const protocol = requestLine[2];
+  const url = `http://localhost:${listener.localAddress.port}${path}`;
+  const request = new Request(url, {
+    method,
+    path,
+    protocol,
+    headers,
+  });
+  const response = await HONO_APP.fetch(request);
+  let responseHeaders = "";
+  for (const [key, value] of response.headers.entries()) {
+    responseHeaders += `${key}: ${value}\r\n`;
+  }
+
+  // 这里非常肮脏地依赖了 txiki.js 内部的实现细节，因为它目前没有支持 WinterTC 的 Stream Response API
+  // 我只能通过这种方式获取它内部由 Hono 返回的响应流
+  const bodyType = typeof response._bodyInit === 'string' ? 'string' :
+    response._bodyInit instanceof ReadableStream ? 'stream' : 'buffer';
+  if (bodyType === 'stream') {
+    responseHeaders += `transfer-encoding: chunked\r\n`;
+  }
+
+  connection.setNoDelay(true);
+  await connection.write(new TextEncoder().encode(`HTTP/1.1 ${response.status} ${response.statusText}\r\n${responseHeaders}\r\n`));
+  if (bodyType === 'string') {
+    await connection.write(ENCODER.encode(await response.text()));
+  } else if (bodyType === 'buffer') {
+    const data = await response.arrayBuffer();
+    await connection.write(new Uint8Array(data));
+  } else {
+    const chunkedEncoder = new TransformStream({
+      transform(chunk, controller) {
+        controller.enqueue(ENCODER.encode(chunk.length.toString(16)));
+        controller.enqueue(ENCODED_NEWLINE);
+        controller.enqueue(chunk);
+        controller.enqueue(ENCODED_NEWLINE);
+      },
+      flush(controller) {
+        controller.enqueue(ENCODED_CHUNK_END);
+      }
+    });
+    const theBody = response._bodyInit;
+    await theBody.pipeThrough(chunkedEncoder).pipeTo(connection.writable);
+  }
+
+  connection.close();
+}
+
+const options = getopts(tjs.args.slice(2), {
+  alias: { listen: "l", port: "p" },
+  default: { listen: "127.0.0.1", port: 8080 },
+});
+const listener = await tjs.listen("tcp", options.listen, options.port);
+
+console.log(`Listening on ${listener.localAddress.ip}:${listener.localAddress.port}`);
+for await (let connection of listener) {
+  handleConnection(listener, connection).catch((e) => {
+    console.error('handleConnection error', e);
+  });
+  connection = undefined;
+}
+```
+
+我使用了 Nix 提供的 `stdenv.mkDerivation` 来给龙芯 2F 编译 txiki.js，如下面的代码所示。我仍然使用前文列出的交叉编译配置，编译过程相当顺利。将 txiki.js 远程部署到逸珑笔记本后顺利运行。
+
+```nix
+{
+  stdenv, fetchFromGitHub, cmake, texinfo, autoconf, automake, libtool, curl, libffi
+}: stdenv.mkDerivation {
+  pname = "txiki";
+  version = "ba8bf77";
+
+  src = fetchFromGitHub {
+    owner = "saghul";
+    repo = "txiki.js";
+    rev = "ba8bf7742e2304816ddada0872284cc6047a3c8c";
+    sha256 = "sha256-lwjoY+iHXCPH7oM8AJGTTZiWMjRBX+cEJAIyP3n7J2I=";
+    fetchSubmodules = true;
+  };
+
+  nativeBuildInputs = [ cmake texinfo autoconf automake libtool ];
+  buildInputs = [ curl libffi ];
+
+  cmakeFlags = [
+    # 使用我们从 nixpkgs 提供的 libffi
+    "-DUSE_EXTERNAL_FFI=ON"
+    # 关闭 mimalloc，它并不支持 MIPS 平台
+    "-DBUILD_WITH_MIMALLOC=OFF"
+  ];
+
+  buildPhase = ''
+    make
+  '';
+
+  installPhase = ''
+    mkdir -p $out/bin
+    mv tjs $out/bin
+  '';
+}
+```
+
+### 构建博客
+
+理论上，我可以通过 Nix 编译博客，并且将相关的 Nix 代码写到逸珑笔记本的 NixOS 配置中一起管理。由于 Nix 表达式的灵活性，我可以在编译时不使用交叉编译环境，而是使用我的 amd64 机器原生的编译环境。
+
+然而，我在这里踩到了一个让我束手无策的坑：`node_modules` 文件夹中的二进制依赖无法在 NixOS 中运行（我的 amd64 机器运行的也是 NixOS），导致项目编译失败，我们会得到类似下面的报错，这是因为 NixOS 要求所有动态依赖二进制必须链接到 Nix Store 中存储的特定版本的动态库。
+
+```console
 $ ./sass
 Could not start dynamically linked executable: /tmp/nix-build-blog-2025-3-26.drv-0/build/source/node_modules/.pnpm/sass-embedded-linux-x64@1.85.0/node_modules/sass-embedded-linux-x64/dart-sass/src/dart
 NixOS cannot run dynamically linked executables intended for generic
 linux environments out of the box. For more information, see:
 https://nix.dev/permalink/stub-ld
 ```
+
+这些二进制依赖的作者会假设用户会在遵循 [FHS 规范](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard)的发行版中使用，这些发行版都默认动态库存在于 `/usr/lib` 等文件夹中，并且遵循一套和 NixOS 相比宽泛得多的版本兼容规则。我暂时没有时间寻找解决方案，只能暂时使用其它方式编译博客，再将产物打包为 Nix 包部署到逸珑笔记本上。至此，我成功在龙芯 2F 上运行了我的博客。
+
+## 结语
+
+我想用「寻找意义本身就是最大的意义」来总结本文的内容。
+
+在去年的 12 月，我计划使用 Waku 框架重写过去基于 [SvelteKit 框架](https://svelte.dev/docs/kit/introduction)编写的博客，并将它运行在我的龙芯 3A6000 主机上，这次重写计划还包括重新设计博客的 UI。当时的我比较缺乏灵感，所以重写计划推进得很慢。直到今年年后的一天晚上，我偶然在龙芯的交流群中看到有人提到闲鱼有人在出逸珑笔记本，我当即就将它拍下了，并且想起了我的博客重写计划，打算转而尝试将其部署到笔记本上运行。
+
+在收到笔记本之后，我一度想让博客直接在它原厂系统上运行，尝试用 [crosstool-ng](https://github.com/crosstool-ng/crosstool-ng) 给它交叉编译 txiki.js（它的原厂系统似乎并不自带编译器），但最终还是失败了。因为原厂系统的 2.6.27 内核实在是太老了，txiki.js 的一些依赖无法在它上面编译。
+
+这之后我才打算基于 dram 的工作，尝试将 NixOS 部署在这台笔记本上。其实我是从去年底才开始接触 NixOS 的，当时阅读 dram 的 NixOS 配置，自己是处于几乎看不懂的状态。好在最终我还是克服了障碍，并且对 NixOS 有了更加深入的理解。
+
+> 在我从闲鱼上买下这台逸珑笔记本之后，我和卖家零碎地进行了一些交流，得知他也是龙芯爱好者。之后，我又从他那里收来了一张灵珑一体机的主板，型号是 9003，同样搭载了龙芯 2F 处理器，看上去比逸珑笔记本更适合作为长期运行的服务器使用。不过，[由于 9003 的部分硬件的特殊性（似乎是南桥芯片），可用的 Linux 内核版本停留在了 2.6.27](https://wiki.chuang.ac.cn/loongson:device:lemote_lynloong#%E5%86%85%E6%A0%B8%E4%B8%8E%E7%B3%BB%E7%BB%9F%E6%94%AF%E6%8C%811)。
+> 
+> <BlogImage filePath="running-my-blog-on-loongson-2f/9003" caption="这张 9003 主板的正面照" />
+>
+> 这些灵珑一体机主板需要手工焊接 VGA 座子才能通过 VGA 输出视频信号，主板上的另一个视频接口似乎是一个相当冷门的规格，除了原装的屏幕外很难找到其它选择。
+>
+> 在我完成本文描述的工作并开始撰写内容时，这位卖家又将一块焊接好 VGA 的 9002 型号的一体机主板赠送给我了，并且发现我给逸珑笔记本准备的 NixOS 系统镜像可以直接在它上面运行。这里非常感谢他的慷慨相赠（他似乎不愿透露姓名），我之后应该会再将博客迁移到这块 9002 主板上，并简单聊聊这些一体机主板。
+>
+> <BlogImage filePath="running-my-blog-on-loongson-2f/9002" caption="这张 9002 主板的正面照" />
+> 

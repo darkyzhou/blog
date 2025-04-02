@@ -5,9 +5,9 @@ import { BlogImage } from '../../components/BlogImage'
 ## theresa
 
 - CPU: Intel Core i7-12700T (8P+4E cores, 20 threads)
-- RAM: SAMSUNG 2Rx8 DDR4-3200 32GiB x 2
-- SSD1: KIOXIA EXCERIA G2 1TiB
-- SSD2: ZHITAI PC005 Active 256GiB
+- RAM: SAMSUNG 2Rx8 DDR4-3200 32 GiB x 2
+- SSD1: KIOXIA EXCERIA G2 1 TiB
+- SSD2: ZHITAI PC005 Active 256 GiB
 - Motherboard: MAXSUN MS-CHALLENGER H610ITX 2LAN
 - OS: NixOS 25.05 (Warbler) x86_64
 - Kernel: 6.13.5-xanmod1
@@ -37,10 +37,10 @@ import { BlogImage } from '../../components/BlogImage'
 ## timido
 
 - CPU: AMD Ryzen 9 9800X3D (8 cores, 16 threads)
-- RAM: ADATA XPG LANCER BLADE DDR5-6000 32GiB x 2
-- GPU: GALAX GeForce RTX 5080 Magic Blade
-- SSD1: SAMSUNG 990 EVO Plus 1TiB
-- SSD2: SK Hynix Platinum P41 2TiB
+- RAM: ADATA XPG LANCER BLADE DDR5-6000 32 GiB x 2
+- GPU: GALAX GeForce RTX 5080 Magic Blade 16 GiB GDDR7
+- SSD1: SAMSUNG 990 EVO Plus 1 TiB
+- SSD2: SK Hynix Platinum P41 2 TiB
 - Motherboard: GIGABYTE B650I AORUS ULTRA WIFI DDR5
 - OS: Windows 11 24H2
 
@@ -77,7 +77,7 @@ import { BlogImage } from '../../components/BlogImage'
 ## vita
 
 - CPU: Apple M4 (4P+6E cores, 10 threads)
-- RAM: LPDDR5X 16GiB
+- RAM: LPDDR5X 16 GiB
 - OS: macOS Sequoia 15.2
 
 这台笔记本是我的主力机，或者说 daily driver。我用它浏览网页，通过 SSH 连接到本文介绍的各个主机上进行开发和维护。它是我于 2024 年 10 月底在京东抢到的**第一批**国行 Macbook Pro 14 英寸，带国补。虽然事后被舍友吐槽说 M4 的 Macbook Pro 性价比很低，远不如 M4 Pro 的型号，后者比前者足足多 4 个大核。
@@ -89,9 +89,9 @@ import { BlogImage } from '../../components/BlogImage'
 ## herta
 
 - CPU: Loongson 3A6000-HV @ 2.5GHz (4 cores, 8 threads)
-- RAM: CXMT DDR4-2666 8GiB x 2
-- GPU: AMD Radeon Pro WX 4100 4GiB GDDR5
-- SSD: ZHITAI PC005 Active 256GiB
+- RAM: CXMT DDR4-2666 8 GiB x 2
+- GPU: AMD Radeon Pro WX 4100 4 GiB GDDR5
+- SSD: ZHITAI PC005 Active 256 GiB
 - Motherboard: ASUS XC-LS3A6M
 - OS: AOSC OS (12.0.4)
 
@@ -101,7 +101,7 @@ import { BlogImage } from '../../components/BlogImage'
 >
 > 如果你在百度或者谷歌上搜索「龙芯」，很可能会看到推荐搜索词中出现「龙芯骗局」或者「龙芯造假」之类的词，这应该是我长大以来看到的最匪夷所思的谣言了。事实上，真正造假的是由陈进领导研发的「汉芯」，[它被发现是将摩托罗拉芯片打磨去除表面商标字样后，再印上汉芯的标签生产的芯片](https://www.sohu.com/a/229727711_99970452)。据我所知，汉芯和龙芯没有任何关系，我实在无法理解为什么有如此多人会混淆这两个完全不同的词语。
 
-如果你也对龙芯感兴趣，我不推荐购买这款华硕的主板，它存在一些奇怪的硬件缺陷，例如我这块主板的第一个 PCIe 槽以外的 PCIe 插槽存在问题，插在上面的网卡无法正常工作。我更推荐购买龙芯中科原厂设计的 XA61200 或 XA61201 主板。此外，龙芯 3A6000 的内存兼容性较差，你可能需要参考[社区的一些帖子](https://bbs.loongarch.org/d/322-3a6000)来选择合适的内存条。
+如果你也对龙芯感兴趣，我不推荐购买这款华硕的主板，它存在一些奇怪的硬件缺陷，例如我这块主板的第一个 PCIe 槽以外的 PCIe 插槽存在问题，插在上面的网卡无法正常工作。我更推荐购买龙芯中科原厂设计的 XA61201 主板。此外，龙芯 3A6000 的内存兼容性较差，你可能需要参考[社区的一些帖子](https://bbs.loongarch.org/d/322-3a6000)来选择合适的内存条。
 
 <BlogImage filePath="hardware/herta" caption="这台主机位于我的书桌下，放在了边桌旁边的地面上" />
 <BlogImage filePath="hardware/wx4100" caption="AMD Radeon Pro WX 4100 的照片，它的外壳设计真的非常好看" />
@@ -109,8 +109,8 @@ import { BlogImage } from '../../components/BlogImage'
 ## yggdrasil
 
 - CPU: Loongson 3C6000 @ 2.2GHz (16 cores, 32 threads)
-- RAM: UniIC DDR4-3200 ECC RDIMM 32GiB x 4
-- SSD: KIOXIA EXCERIA G2 2TiB
+- RAM: UniIC DDR4-3200 ECC RDIMM 32 GiB x 4
+- SSD: KIOXIA EXCERIA G2 2 TiB
 - OS: AOSC OS (12.0.4)
 
 这台主机主要用于龙芯的应用开发和维护，例如我维护的 [electron-loong64](https://github.com/darkyzhou/electron-loong64) 项目就是在这台主机上编译的。龙芯 3C6000 的性能相当不错，在龙芯的软件生态（包括编译器优化等）尚不成熟的当下，它据称在体感上有着接近 Ryzen 5 5700X 的性能表现。
@@ -124,8 +124,8 @@ import { BlogImage } from '../../components/BlogImage'
 ## datalake
 
 - Model: QNAP TS-532X
-- HDD: WD DC HC320 8TiB x 3
-- SSD: CRUCIAL MX500 500GiB x 2
+- HDD: WD DC HC320 8 TiB x 3
+- SSD: CRUCIAL MX500 500 GiB x 2
 
 这台主机主要用于 NAS 存储。它被放置在客厅的角落，因为三块 HC320 硬盘的炒豆子般的噪音相当可怕。曾经它被我放置在我房间中，导致我彻夜难眠。
 
@@ -134,8 +134,8 @@ import { BlogImage } from '../../components/BlogImage'
 ## sirin
 
 - CPU: Intel N100 (4 cores, 4 threads)
-- RAM: SEIWHALE DDR4-3200 8GiB
-- SSD: ZHITAI SC005 Active 256GiB
+- RAM: SEIWHALE DDR4-3200 8 GiB
+- SSD: ZHITAI SC005 Active 256 GiB
 - OS: NixOS 25.05 (Warbler) x86_64
 - Kernel: 6.13.5-xanmod1
 
@@ -146,8 +146,8 @@ import { BlogImage } from '../../components/BlogImage'
 ## raven
 
 - CPU: Phytium FT-2000/4 (4 cores, 4 threads)
-- RAM: CXMT 1Rx8 DDR4-3200 8GiB x 2
-- SSD: SAMSUNG PM851 128GiB
+- RAM: CXMT 1Rx8 DDR4-3200 8 GiB x 2
+- SSD: SAMSUNG PM851 128 GiB
 - OS: NixOS 25.05 (Warbler) aarch64
 - Kernel: 6.13.3-aosc-main
 
@@ -166,8 +166,8 @@ import { BlogImage } from '../../components/BlogImage'
 ## ex-raven
 
 - CPU: ZHAOXIN KX-6640MA (4 cores, 4 threads)
-- RAM: DDR4-2400 8GiB x 2
-- SSD: 128GiB
+- RAM: DDR4-2400 8 GiB x 2
+- SSD: 128 GiB
 
 这台主机是我的第二代 All in One 主机，之后又被我作为软路由使用，现在被退役下来闲置了。它现在上电开机之后，散热风扇会传出一些烧焦的气味，我已经不敢再让它开机了（据称这台主机的内部做工很一般）。
 
@@ -180,23 +180,44 @@ import { BlogImage } from '../../components/BlogImage'
 <BlogImage filePath="hardware/ex-raven1" caption="这款主机的外观较为方正" />
 <BlogImage filePath="hardware/ex-raven2" caption="这款主机带有两个笔记本内存插槽，以及两个 2280 规格的 M.2 NVMe 插槽" />
 
-## sakimi
+## sakimi-8089
 
-- CPU: Loongson 2F (1 core, 1 thread)
-- RAM: Transcend DDR2-667 1GiB
-- Drive: SanDisk Ultra microSD card 32GiB
+- CPU: Loongson-2F (1 core, 1 thread)
+- RAM: Transcend DDR2-667 1 GiB
+- Drive: SanDisk Ultra microSD card 32 GiB
 - OS: NixOS 25.05 (Warbler) mips64
 - Kernel: 6.6.25-NixOS
 
-这是一台航天龙梦（Lemote）于 [2008 年 12 月](https://arc.net/l/quote/dkjheqjb)发布的逸珑 8089 笔记本，具体的型号可能是 8089A，因为它出厂自带的是 512MiB 的内存以及 2GiB 的 SSD。[它被称为中国自己研发制造的第一台笔记本电脑](http://cniti.com/index.php/article/index/id/208)，也是著名的自由软件运动和 GNU 项目的发起人 Richard Stallman [在 2010 年至 2012 年期间使用的电脑](https://arc.net/l/quote/trncybfc)（不幸的是，他的这台笔记本在 2012 年时放在包里被偷了）。
+这是一台航天龙梦（Lemote）[于 2008 年 12 月发布](https://arc.net/l/quote/dkjheqjb)的逸珑 8089 笔记本，具体的型号可能是 8089A，因为它出厂自带的是 512 MiB 的内存以及 2 GiB 的 SSD。[它被称为中国自己研发制造的第一台笔记本电脑](http://cniti.com/index.php/article/index/id/208)，也是著名的自由软件运动和 GNU 项目的发起人 Richard Stallman [在 2010 年至 2012 年期间使用的电脑](https://arc.net/l/quote/trncybfc)（不幸的是，他的这台笔记本在 2012 年时放在包里被偷了）。
 
 <BlogImage filePath="hardware/sakimi1" caption="这台笔记本的正面照，成色和质感相当不错" />
 
-这台笔记本搭载的是单核心的 Loongson 2F 处理器，发布于 2007 年，[兼容 MIPS-III 64bit 架构](https://arc.net/l/quote/eveyualf)。[MIPS-III 架构](https://arc.net/l/quote/qdxklpzc)是一款发布于 1991 年的古老架构，可以说是龙芯于两年后推出的 3A1000 处理器所兼容的 MIPS64 Release 2 架构的太祖父。
+这台笔记本搭载的是单核心的龙芯 2F 处理器（Loongson-2F），发布于 2007 年，[兼容 MIPS-III 64bit 架构](https://arc.net/l/quote/eveyualf)。[MIPS-III 架构](https://arc.net/l/quote/qdxklpzc)是一款发布于 1991 年的古老架构，可以说是龙芯于两年后推出的 3A1000 处理器所兼容的 MIPS64 Release 2 架构的太祖父。
+
+> 我对 MIPS 架构的印象基本只有两件事：大二学习计算机组成原理时，教授要求我们在 Vivado 上制作一款带流水线和分支预测的 MIPS CPU，以及大学时我在宿舍使用的搭载了 MT7621 的极路由 4 路由器，这款 SoC 使用的也是 MIPS 架构。
 
 <BlogImage filePath="hardware/sakimi2" caption='这台笔记本原装的系统截图，内核还是 2008 年 10 月发布的 2.6.27' />
 
-Loongson 2F 这款处理器在当年相当流行，对它的支持很早就进入了 Linux 和 GCC 主线，以至于直到 2025 年的今天，我们仍然可以用 GCC 14 编译出一份能够在它上面运行的 Linux 6.6.25 内核以及 NixOS 发行版。也许你已经注意到博客左侧或底部的「Powered by」字样了，本博客实际上正是在这台笔记本上运行的。详情请见[《在龙芯 2F 上运行我的博客》](/articles/running-my-blog-on-loongson-2f)。
+龙芯 2F 这款处理器在当年相当流行，对它的支持很早就进入了 Linux 和 GCC 主线，以至于直到 2025 年的今天，我们仍然可以用 GCC 14 编译出一份能够在它上面运行的 Linux 6.6.25 内核以及 NixOS 发行版。
 
-<BlogImage filePath="hardware/sakimi3" caption="在这台笔记本上运行 NixOS 的截图" />
+<BlogImage filePath="hardware/sakimi3" caption="在这台笔记本上运行 NixOS 的照片" />
 
+## sakimi-8082
+
+- CPU: Loongson-2F (1 core, 1 thread)
+- RAM: DDR2-667 512 MiB
+- Drive: ADATA SP580 240 GiB
+- OS: NixOS 25.05 (Warbler) mips64
+- Kernel: 6.6.25-NixOS
+
+这是一块航天龙梦（Lemote）推出的灵珑一体机的主板，型号是 9002，发布时间似乎是 2010 年。主板是通过一种未知规格的视频线连接到原装显示器的，如果需要使用主板上的 VGA 端口则需要手动焊接一个 VGA 母座和一些外围电路。主板原本还带有两块小板，分别引出两个 USB 接口和音频接口，以及一个电源按钮。不过我并没有这两个小板，只能通过短接网口旁的接口上的第二和第三针来开机。
+
+<BlogImage filePath="hardware/sakimi4" caption="这块主板的正面照" />
+
+龙芯 2F 处理器似乎有两款型号，一款印有意法半导体的 LOGO，如上图所示；另一款印有「龙芯 2 号」字样，出现在我淘到的另一款型号为 9003 的灵珑一体机主板。《龙芯的足迹》中提到，龙芯和意法半导体（STMicroelectronics）在那段时间存在合作关系，双方共同对龙芯 2F 处理器的设计进行了优化，使其在性能大幅提高 20%～30% 的同时，功耗下降了 30%～50%。[有人猜测：印有意法半导体 LOGO 的型号「大概率是龙芯和意法半导体合作的时候对外授权了 IP 核之后意法半导体进行改进后的产物」](https://arc.net/l/quote/bngrhvsa)，但没有说明另一款是否也得到了改进。
+
+<BlogImage filePath="running-my-blog-on-loongson-2f/9003" caption="这张 9003 主板的正面照，注意处理器上印着的是「龙芯 2 号」字样" />
+
+型号为 9001 或 9002 的主板上的硬件和前文的逸珑笔记本相似，同样搭载龙芯 2F 处理器，因此也可以运行主线内核和最新的 NixOS。也许你已经注意到博客左侧或底部的「Powered by」字样了，本博客实际上正是在这台笔记本上运行的。详情请见[《在龙芯 2F 上运行我的博客》](/articles/running-my-blog-on-loongson-2f)。
+
+<BlogImage filePath="hardware/sakimi5" caption="目前，它用来被我作为服务器使用，上面运行着本博客的程序" />

@@ -4,7 +4,7 @@ export const title = '给飞腾 FT-2000/4 编译 NixOS'
 export const date = '2025-03-10T11:12:25.123Z'
 export const category = 'linux'
 export const excerpt = `
-飞腾 FT-2000/4 是一款国产的 ARM 架构的处理器，这篇文章会介绍我给它编译 NixOS 并将它作为我的软路由的过程
+飞腾 FT-2000/4 是一款国产的 ARM 架构的桌面级处理器，这篇文章会介绍我给它编译 NixOS 并将它作为我的软路由的过程
 `.trim()
 
 ## 前言
@@ -157,7 +157,7 @@ make: *** [/build/linux-6.13.3/Makefile:251: __sub-make] Error 2
 
 既然 FT-2000/4 宣称兼容 ARMv8 体系架构（一般指代 ARMv8-A 架构），那么它理应支持 NEON 指令集。那么问题可能出在 Nix 给 GCC 配置的 `-march` 参数，这个参数指定了 GCC 在处理汇编代码时能够使用的指令。我们可以通过下面的方法查询目前 FT-2000/4 主机的 GCC 参数：
 
-```plain
+```console
 $ nix repl
 Nix 2.24.12
 Type :? for help.
@@ -185,7 +185,7 @@ nix-repl> stdenv.hostPlatform.gcc
 
 之后，我们重新编译内核，这次编译持续的时间更长了，但……又遇到了新的报错：
 
-```plain
+```log
 ../drivers/gpu/drm/radeon/radeon_ring.c: In function 'radeon_ring_commit':
 ../drivers/gpu/drm/radeon/radeon_ring.c:188:9: error: implicit declaration of function 'mmiowb' [-Wimplicit-function-declaration]
   188 |         mmiowb(); /* Make sure wptr is up-to-date for hw */
@@ -207,7 +207,7 @@ make[3]: *** Waiting for unfinished jobs....
 
 > 在 Linux 等项目的语境中，build 阶段指的是编译阶段，而 install 阶段指的是安装阶段，后者会将前者产生的各种文件复制到系统中的指定位置。
 
-```plain
+```log
 ...
 buildPhase completed in 4 hours 36 minutes 40 seconds
 Running phase: installPhase
@@ -267,7 +267,7 @@ make[1]: *** Waiting for unfinished jobs....
 
 `linuxManualConfig` 使用其中的 `linux-kernel.target` 大概是因为需要确保编译出来的内核的「形式」和当前主机正在用的内核「形式」一样。为了得到它的具体值，我们可以使用 `nix repl` 工具运行这个表达式。
 
-```plain
+```console
 $ nix repl
 Nix 2.24.12
 Type :? for help.
@@ -288,7 +288,7 @@ nix-repl> stdenv.hostPlatform.linux-kernel
 
 可以看到，我们的 FT-2000/4 主机当前使用的 `target` 是 `Image`。因此，我们编译出来的内核文件的形式应该是纯二进制格式的映像。这一点可以从失败的 Nix 构建对应的临时文件夹看出来：
 
-```
+```console
 $ cd /tmp/nix-build-linux-6.13.3.drv-3/build/linux-6.13.3/build/arch/arm64/boot
 $ ls
 dts  Image
@@ -332,7 +332,7 @@ endif
 
 > `/proc/config.gz` 文件承载了当前系统运行的内核在编译时的配置。
 
-```
+```console
 $ zgrep CONFIG_COMPRESSED_INSTALL /proc/config.gz
 
 # CONFIG_COMPRESSED_INSTALL is not set
@@ -347,6 +347,8 @@ $ zgrep CONFIG_COMPRESSED_INSTALL /proc/config.gz
 <BlogImage filePath="compiling-nixos-for-ft2000/fastfetch" />
 
 最后，我发现 SV1-F2026c 主板上的 3 个 COM 接口未能被内核识别，根据[信步官网](https://seavo.com/support/downloads-info_itemid_362.html)，似乎需要下载驱动源码进行编译。由于暂时用不到这几个接口（我自己有 USB 转串口模块），我没有继续深究了。
+
+接下来我可能会研究将 [XanMod 内核](https://xanmod.org/)的部分与网络性能相关的补丁移植过来，尤其是 Cloudflare 和 Google 的一些 TCP 补丁，看看能不能提升它作为软路由的性能。
 
 ## 流程总结
 
@@ -363,7 +365,7 @@ $ zgrep CONFIG_COMPRESSED_INSTALL /proc/config.gz
     }
     ```
 
-2. 从 [AOSC 的仓库](https://github.com/AOSC-Dev/aosc-os-abbs/blob/87b5135ef2c8ad508462e87b0bdcd431d2a65976/runtime-kernel/linux-kernel) 获取内核配置和补丁集。
+2. 从 [AOSC 的仓库](https://github.com/AOSC-Dev/aosc-os-abbs/blob/87b5135ef2c8ad508462e87b0bdcd431d2a65976/runtime-kernel/linux-kernel)获取内核配置和补丁集。
   
     它们分别位于 `autobuild/arm64/config` 和 `autobuild/patches` 目录下。注意去除后缀名不为 `.patch` 的补丁，例如 `xxx.patch.loongarch64` 这样的补丁。
 

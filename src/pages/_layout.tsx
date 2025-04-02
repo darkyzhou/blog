@@ -26,29 +26,27 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           muted
           autoPlay
           playsInline
-          // poster="/images/{backgroundName}.jpg"
           className="absolute inset-0 h-full w-full object-cover object-[center_center]"
         >
-          {/* <source src="/images/background.webm" type="video/webm" /> */}
           <source src="/assets/background.mp4" type="video/mp4" />
         </video>
         <NavBar />
       </div>
       <aside className="sticky top-[25dvh] md:h-[75dvh] row-start-2 row-end-2 md:row-end-4 col-span-full md:col-span-2 bg-carbongray-900 md:bg-carbongray-800 grid grid-cols-subgrid grid-rows-subgrid md:flex md:flex-col text-carbongray-100 md:border-x border-carbongray-600">
         <div className="col-span-3 md:flex-none flex flex-col border-r md:border-none border-carbongray-600/40">
-          <div className="flex-1 min-h-0 bg-carbongray-800 relative">
-            <img src="/assets/avatar.jpg" alt="avatar" className="w-full h-full object-cover aspect-square brightness-90 saturate-90" draggable={false} />
+          <Link to="/articles/commission-on-avatar" className="block group flex-1 min-h-0 bg-carbongray-800 relative">
+            <img src="/assets/avatar.jpg" alt="avatar" className="w-full h-full object-cover aspect-square brightness-95 saturate-95" draggable={false} />
             <div
-              className="absolute inset-0"
+              className="absolute inset-0 blur-xs group-hover:blur-md transition-all duration-300"
               style={{
-                backdropFilter: 'blur(8px) saturate(120%) brightness(60%)',
+                backdropFilter: 'saturate(80%) brightness(70%)',
                 WebkitMask: 'linear-gradient(to right, black 16px, transparent 16px), linear-gradient(to left, black 16px, transparent 16px), linear-gradient(to bottom, black 16px, transparent 16px), linear-gradient(to top, black 16px, transparent 16px)',
                 maskPosition: 'center',
                 WebkitMaskPosition: 'center',
               }}
             >
             </div>
-          </div>
+          </Link>
         </div>
         <div className="col-span-3 md:flex-1 min-h-0 grid grid-rows-4 md:grid-rows-5 border-t md:border-none border-carbongray-600/40">
           <Link to="/about" className="flex" unstable_prefetchOnView scroll>
@@ -81,9 +79,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             </SidebarButton>
           </div>
           <div className="text-carbongray-400 hidden md:flex flex-col justify-center text-xs px-4 pb-2 py-4">
-            <div>
-              <Footer />
-            </div>
+            <Footer />
           </div>
         </div>
       </aside>

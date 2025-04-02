@@ -6,7 +6,7 @@ interface FooterProps {
 
 export function Footer({ showStats = false }: FooterProps) {
   return (
-    <div className="contents text-balance font-mono px-2 font-normal">
+    <div className="contents text-balance font-mono px-2 font-normal tracking-tight">
       {showStats && (
         <p className="text-xs mb-2 text-carbongray-400">
           <BlogStats />

@@ -20,7 +20,7 @@ export function NavBar() {
         </h1>
       </Link>
       <div className="col-span-1 md:col-span-2 lg:col-span-4 xl:col-span-6" />
-      <NavItem className="border-l border-carbongray-600" caption="首页" to="/" active={!path || path === '/'} />
+      <NavItem className="border-l border-carbongray-600" caption="文章" to="/" active={!path || path === '/'} />
       <NavItem className="border-l md:border-x border-carbongray-600" caption="分类" to="/categories" active={path === '/categories'} />
     </nav>
   )
