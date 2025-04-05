@@ -17,7 +17,8 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       className="md:px-12 lg:px-16 xl:px-32 w-[100dvw] bg-carbongray-900 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25vh_25vh_12.5vh_1fr] md:grid-rows-[25vh_12.5vh_1fr]"
     >
       <meta name="theme-color" content="#161616" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
       <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
