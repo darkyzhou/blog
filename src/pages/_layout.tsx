@@ -32,6 +32,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           playsInline
           className="absolute inset-0 h-full w-full object-cover object-[center_center]"
         >
+          <source src="/assets/background.webm" type="video/webm" />
           <source src="/assets/background.mp4" type="video/mp4" />
         </video>
         <NavBar />
