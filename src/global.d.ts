@@ -6,9 +6,5 @@ declare module '*.module.css' {
 declare module '*.mdx' {
   const toc: BlogArticleToc
   const content: BlogArticleModule
-  export { toc, content as default }
-}
-
-interface ImportMeta {
-  glob: <M>(glob: string, options: { eager: true }) => Record<string, M>
+  export { content as default, toc }
 }

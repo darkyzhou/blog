@@ -18,6 +18,6 @@ export function BlogStats() {
   }, [])
 
   return (
-    <Link to="/articles/running-my-blog-on-loongson-2f" className="hover:underline underline-offset-2 decoration-carbongray-400 decoration-dashed decoration-1">{stats}</Link>
+    <Link to="/articles/running-my-blog-on-loongson-2f" className="decorated-link">{stats}</Link>
   )
 }

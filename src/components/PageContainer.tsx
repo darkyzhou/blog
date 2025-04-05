@@ -25,7 +25,7 @@ export function PageContainer({ children, title, pageTitle }: PageContainerProps
           {children}
         </main>
         <footer className="col-span-full md:hidden text-carbongray-400 text-sm text-center py-8">
-          <Footer showStats />
+          <Footer showVersion showStats />
         </footer>
       </div>
     </article>

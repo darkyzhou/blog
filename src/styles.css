@@ -90,6 +90,10 @@ body {
   @apply overscroll-none md:overscroll-x-auto;
 }
 
+.decorated-link {
+  @apply hover:underline underline-offset-2 decoration-carbongray-400 decoration-dashed decoration-1;
+}
+
 *:focus-visible {
   @apply outline-[2px] outline-carbongray-200;
 }

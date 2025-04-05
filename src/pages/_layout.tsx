@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { BlogStats } from '@/components/BlogStats'
+import { BlogVersion } from '@/components/BlogVersion'
 import { Footer } from '@/components/Footer'
 import { Link } from 'waku'
 import { NavBar } from '../components/NavBar'
@@ -87,14 +88,15 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         </div>
       </aside>
       <div
-        className="hidden md:flex fixed top-[25vh] bottom-0 left-0 w-12 lg:w-16 xl:w-32 py-2 px-1 items-end select-none"
+        className="hidden md:flex md:flex-col fixed top-[25vh] bottom-0 left-0 w-12 lg:w-16 xl:w-32 py-2 px-1 justify-end gap-1 select-none"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
           transform: 'rotate(-180deg)',
         }}
       >
-        <div className="flex-1 text-carbongray-400 text-xs font-mono px-2">
+        <BlogVersion className="flex-none" />
+        <div className="flex-none text-carbongray-400 text-xs font-mono px-2">
           <BlogStats />
         </div>
       </div>
