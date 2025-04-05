@@ -4,7 +4,7 @@ import * as content from './content.mdx'
 
 export default async function Index() {
   return (
-    <PageContainer title="关于">
+    <PageContainer title="快速了解我">
       <ArticleContainer title="关于" toc={content.toc}>
         <content.default />
       </ArticleContainer>

@@ -3,10 +3,11 @@ import { Footer } from './Footer'
 
 export type PageContainerProps = PropsWithChildren<{
   title: string
+  pageTitle?: string
 }>
 
-export function PageContainer({ children, title }: PageContainerProps) {
-  const fullTitle = `${title} ·  Darky's Blog`
+export function PageContainer({ children, title, pageTitle }: PageContainerProps) {
+  const fullTitle = pageTitle ?? `${title} ·  Darky's Blog`
   return (
     <article
       className="relative row-span-full col-start-1 md:col-start-3 col-end-12 grid grid-cols-subgrid grid-rows-[repeat(3,auto)1fr] min-h-0 pointer-events-none md:-mr-12 lg:-mr-16 xl:-mr-32"

@@ -7,7 +7,6 @@ import { Link } from 'waku'
 export default async function Index() {
   return (
     <PageContainer title="分类列表">
-      <title>分类列表 ·  Darky's Blog</title>
       <ArticleList size="large">
         {Object.entries(BLOG_CATEGORIES).map(([slug, category]) => (
           <CategoryCard key={slug} slug={slug} category={category.title} excerpt={category.excerpt} />

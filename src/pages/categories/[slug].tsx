@@ -13,12 +13,6 @@ export default async function Index({ slug }: IndexProps) {
 
   return (
     <PageContainer title={`分类：${category}`}>
-      <title>
-        分类：
-        {category}
-        {' '}
-        · Darky's Blog
-      </title>
       <ArticleList size="large">
         {articles.map(article => (
           <ArticleCard key={article.slug} slug={article.slug} category={BLOG_CATEGORIES[article.category]?.title ?? '无分类'} title={article.title} date={article.date} excerpt={article.excerpt} />

@@ -5,8 +5,7 @@ import { BLOG_CATEGORIES, SORTED_BLOG_ARTICLES } from '@/data'
 
 export default async function Index() {
   return (
-    <PageContainer title="文章列表">
-      <title>Darky's Blog</title>
+    <PageContainer title="文章列表" pageTitle="Darky's Blog">
       <ArticleList size="large">
         {SORTED_BLOG_ARTICLES.map(article => (
           <ArticleCard
