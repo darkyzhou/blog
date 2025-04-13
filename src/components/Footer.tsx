@@ -23,7 +23,7 @@ export function Footer({ showVersion = false, showStats = false }: FooterProps) 
       >
         粤 ICP 备 2022082297 号
       </a>
-      <p className="text-sm text-balance">
+      <p className="text-xs text-balance">
         <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer noopener" className="hover:underline decoration-dashed">
           CC BY-NC-SA 4.0
         </a>
