@@ -19,11 +19,11 @@ export function Footer({ showVersion = false, showStats = false }: FooterProps) 
         href="https://beian.miit.gov.cn/"
         target="_blank"
         rel="noreferrer noopener"
-        className="text-sm block mb-1 touch-screen:underline hover:underline decoration-dashed decoration-carbongray-400 decoration-1 underline-offset-4"
+        className="block mb-1 touch-screen:underline hover:underline decoration-dashed decoration-carbongray-400 decoration-1 underline-offset-4"
       >
         粤 ICP 备 2022082297 号
       </a>
-      <p className="text-xs text-balance">
+      <p className="text-balance">
         <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noreferrer noopener" className="hover:underline decoration-dashed">
           CC BY-NC-SA 4.0
         </a>

@@ -3,7 +3,7 @@
 import type { ComponentProps, JSX, ReactNode } from 'react'
 import clsx from 'clsx'
 import { createElement } from 'react'
-import { useRouter_UNSTABLE as useRouter } from 'waku'
+import { useRouter } from 'waku'
 
 type SidebarButtonProps<T extends keyof JSX.IntrinsicElements> = ComponentProps<T> & {
   as: T

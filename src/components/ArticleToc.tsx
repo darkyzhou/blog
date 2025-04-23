@@ -9,6 +9,10 @@ export function ArticleToc({ toc }: ArticleTocProps) {
   const flattenedToc = toc.flatMap(entry => [entry, ...entry.children])
   const minimumLevel = flattenedToc.reduce((min, entry) => Math.min(min, entry.depth), Infinity)
 
+  if (!flattenedToc.length) {
+    return null
+  }
+
   return (
     <nav className="text-carbongray-300">
       <h2 className="text-sm tracking-wider mb-4">

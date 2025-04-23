@@ -2,7 +2,7 @@
 
 import Giscus from '@giscus/react'
 import { useLayoutEffect, useState } from 'react'
-import { useRouter_UNSTABLE as useRouter } from 'waku'
+import { useRouter } from 'waku'
 
 export function Comments() {
   const { path } = useRouter()

@@ -2,7 +2,7 @@
 
 import type { LinkProps } from 'waku/router/client'
 import clsx from 'clsx'
-import { Link, useRouter_UNSTABLE as useRouter } from 'waku'
+import { Link, useRouter } from 'waku'
 import styles from './NavBar.module.css'
 
 export function NavBar() {

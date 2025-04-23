@@ -1,25 +1,34 @@
 'use client'
 
-import type { ComponentProps } from 'react'
 import { useState } from 'react'
 
 const DEFAULT_BASE_PATH = import.meta.env.BASE_URL ?? '/'
 const DEFAULT_EXTENSION = 'jpg'
 
-type ImageProps = Omit<ComponentProps<'img'>, 'src'> & {
+interface ImageProps {
   basePath?: string
   filePath: string
   extension?: string
   caption?: string
+  isVideo?: boolean
 }
 
-export function BlogImage({ basePath = DEFAULT_BASE_PATH, filePath, extension = DEFAULT_EXTENSION, caption, ...props }: ImageProps) {
+export function BlogImage({ basePath = DEFAULT_BASE_PATH, filePath, extension = DEFAULT_EXTENSION, caption, isVideo, ...props }: ImageProps) {
   const [isZoomed, setIsZoomed] = useState(false)
   const src = getImageSrc(basePath, filePath, extension)
-  const alt = props.alt ?? caption ?? 'image'
+  const alt = caption ?? 'image'
 
   const toggleZoom = () => {
     setIsZoomed(!isZoomed)
+  }
+
+  if (isVideo) {
+    return (
+      <>
+        <video className="max-w-[80%] max-h-[40vh] mx-auto mb-2" src={src} controls />
+        {caption && <p className="text-center text-sm mt-0 text-carbongray-300">{caption}</p>}
+      </>
+    )
   }
 
   return (
