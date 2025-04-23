@@ -206,7 +206,7 @@ import { BlogImage } from '../../components/BlogImage'
 
 - CPU: Loongson-2F (1 core, 1 thread)
 - RAM: DDR2-667 512 MiB
-- Drive: ADATA SP580 240 GiB
+- Drive: SanDisk 16 GiB
 - OS: NixOS 25.05 (Warbler) mips64
 - Kernel: 6.6.25-NixOS
 
@@ -221,3 +221,19 @@ import { BlogImage } from '../../components/BlogImage'
 型号为 9001 或 9002 的主板上的硬件和前文的逸珑笔记本相似，同样搭载龙芯 2F 处理器，因此也可以运行主线内核和最新的 NixOS。也许你已经注意到博客左侧或底部的「Powered by」字样了，本博客实际上正是在这台笔记本上运行的。详情请见[《在龙芯 2F 上运行我的博客》](/articles/running-my-blog-on-loongson-2f)。
 
 <BlogImage filePath="hardware/sakimi5" caption="目前，它用来被我作为服务器使用，上面运行着本博客的程序" />
+
+## seele
+
+- CPU: AMD Ryzen 5 5500 (6 cores, 12 threads)
+- RAM: KLEVV BOLT-X DDR4-3200 16 GiB x 2
+- GPU: Inno3D RTX 5060 Ti TWIN X2 16 GiB GDDR7
+- SSD1: HP EX950 1 GiB
+- SSD2: ADATA SP580 240 GiB
+- Motherboard: ASUS PRIME A520M-K
+- OS: NixOS 25.05 (Warbler) x86_64
+- Kernel: Linux 6.14.1-zen1
+
+这是我最近组的用于深度学习的主机，主要用于训练一些音频模型，以及运行一些本地模型应用，例如 ComfyUI。
+
+<BlogImage filePath="hardware/seele1" caption="映众的这张卡的设计朴素且规整" />
+<BlogImage filePath="hardware/seele2" caption="目前，这台主机位于我的电脑桌右边" />
