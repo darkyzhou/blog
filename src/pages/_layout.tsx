@@ -15,7 +15,7 @@ interface RootLayoutProps {
 export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <div
-      className="md:px-12 lg:px-16 xl:px-32 w-[100dvw] bg-carbongray-900 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25vh_25vh_12.5vh_1fr] md:grid-rows-[25vh_12.5vh_1fr]"
+      className="md:px-12 lg:px-16 xl:px-32 bg-carbongray-900 grid grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 grid-rows-[25vh_25vh_12.5vh_1fr] md:grid-rows-[25vh_12.5vh_1fr]"
     >
       <meta name="theme-color" content="#161616" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
