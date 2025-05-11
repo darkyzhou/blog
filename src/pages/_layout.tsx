@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Analytics } from '@/components/Analytics'
 import { BlogStats } from '@/components/BlogStats'
 import { BlogVersion } from '@/components/BlogVersion'
 import { Footer } from '@/components/Footer'
@@ -24,6 +25,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
       <link rel="manifest" href="/assets/manifest.json" />
+      <Analytics />
       <div className="sticky top-0 row-start-1 row-end-1 col-span-full h-[25vh] md:-mx-12 lg:-mx-16 xl:-mx-32 md:px-12 lg:px-16 xl:px-32">
         <video
           loop
