@@ -36,6 +36,11 @@ export const BLOG_CATEGORIES: Record<string, BlogCategory> = {
     title: '随笔',
     excerpt: '主要是一些和编程无关的思考和分享，作为本博客仅有的一小部分的「人文」色彩',
   },
+  'llm': {
+    slug: 'llm',
+    title: '大模型',
+    excerpt: '记录我在大模型领域的学习与实践，包括但不限于 Prompt Engineering、应用开发等',
+  },
   'linux': {
     slug: 'linux',
     title: 'Linux 研究日志',
