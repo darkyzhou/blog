@@ -19,7 +19,7 @@ async function processImages() {
       if (entry.isDirectory()) {
         await processDirectory(fullPath, false)
       }
-      else if (entry.isFile() && !ignoreFiles) {
+      else if (entry.isFile() && !ignoreFiles && !entry.name.startsWith('_')) {
         const ext = path.extname(entry.name).toLowerCase()
         if (SUPPORTED_EXTENSIONS.includes(ext)) {
           await processImage(fullPath, ext)
