@@ -42,6 +42,8 @@ export const excerpt = `
 
 2K3000 面向工控领域，社区普遍认为其对标 Rockchip RK3588。2K3000 拥有 8 核 8 线程，价格暂未公布，我猜测在 1000 元左右。其性能据称超越 3A5000，接近 3A6000。遗憾的是，2K3000 的 PCIe 通道较少，目前尚无主板提供 PCIe 插槽。不过，2K3000 集成了龙芯新一代 LG200 显卡，图形性能和视频编解码能力更强。
 
+另外需要注意，2K3000 处理器目前仅符合 [Toolchain Conventions of the LoongArch™ Architecture](https://github.com/loongson/la-toolchain-conventions) 中的 `la64v1.0`（或 `la64v1.1`）目标，并未集成 LASX 向量扩展，而前述 6000 系列则均支持该扩展。虽然目前主流发行版（如 AOSC OS、[Nix4Loong](https://nix4loong.cn) 等）对龙架构的最低兼容要求并不强制 LASX，但缺失该扩展在特定场景下可能会影响部分程序的性能表现，选购时建议结合自身需求权衡。
+
 ### 其它
 
 市面上仍有部分主板搭载 3A5000 处理器，但我并不建议选择此类产品。一方面，部分主板的固件不支持 UEFI，后续系统兼容性和维护性较差；另一方面，3A5000 仅为 4 核 4 线程，性能已难以满足当前开发需求，性价比不高。
