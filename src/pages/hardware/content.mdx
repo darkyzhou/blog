@@ -2,43 +2,52 @@ import { BlogImage } from '../../components/BlogImage'
 
 本文将简要介绍我目前正在使用的计算机设备。其实除了对编程感兴趣之外，我也可以说是一个硬件「垃圾佬」。不过，大学时的我主要寻找的是一些廉价、性价比高的硬件，而如今我更倾向于寻找对我有独特意义的硬件，例如信创硬件。这些计算机设备的名字很多都取自我游玩的一款手游里的角色，你不妨猜猜看是哪款手游。
 
-## theresa
+## seele
 
-- CPU: Intel Core i7-12700T (8P+4E cores, 20 threads)
-- RAM: SAMSUNG 2Rx8 DDR4-3200 32 GiB x 2
-- SSD1: KIOXIA EXCERIA G2 1 TiB
-- SSD2: ZHITAI PC005 Active 256 GiB
-- Motherboard: MAXSUN MS-CHALLENGER H610ITX 2LAN
-- OS: NixOS 25.05 (Warbler) x86_64
-- Kernel: 6.13.5-xanmod1
+- CPU: AMD EPYC 7B13 (64 cores, 128 threads)
+- RAM: SAMSUNG 4Rx4 DDR4-2400 64 GiB x 8
+- GPU: Inno3D RTX 5060 Ti TWIN X2 16 GB
+- SSD: WD SN7100 2 TiB
+- Motherboard: HUANANZHI H12D-8D
+- OS: NixOS 25.11 (Xantusia) x86_64
 
-这台主机主要用于日常的 Linux 开发，我给它安装了桌面环境。我原本打算用 [Hyprland](https://hyprland.org/) 作为桌面环境，但实际体验后发现我很难习惯 Tiling 窗口管理器的逻辑。这台主机和下面要介绍的 sirin 一样，使用了 [XanMod 内核](https://xanmod.org/)，它在原版内核的基础上添加了一些补丁来提高系统的稳定性、流畅度等。
+这台主机主要用于日常的 Linux 开发。
 
-> 这其实是我的第六代 All in One 主机，前五代的 CPU 分别是：
+> 这其实是我的第七代 All in One 主机，前五代的 CPU 分别是：
 > - 第一代：Intel Core i3-9100F，服役时间 2020.1-2020.6。
 > - 第一点五代：Intel Pentium G4560，服役时间 2020.6-2021.3。
 > - 第二代：ZHAOXIN KaiXian KX-6640MA，服役时间 2021.3-?。
 > - 第三代：Intel Core i5-8400T，服役时间 ?-2022.6。
 > - 第四代：AMD Ryzen 5 5800H，服役时间 2022.10-2023.4。
 > - 第五代：AMD Ryzen 9 3900X，服役时间 2023.4-2024.9。
+> - 第六代：Intel Core i7-12700T，服役时间 2024.9-2025.5。
 
-其实这台主机原本安装的是 Proxmox VE，后来我把其中跑各种服务的 VM 搬迁到了下面要介绍的 sirin 上。此时它只剩下用于日常开发的 VM 了，我便将它重装为 NixOS。由此，它已经不能被称作 All in One 主机了。有趣的是，纵观我的六代 All in One 主机，可以发现一个趋势：承担不同职能的 VM 被不断地拆分到其他主机上，包括软路由、NAS 等职能，这可能就是所谓的「合久必分」把。
+我的第六代 All in One 主机原本安装的是 Proxmox VE，后来我把其中跑各种服务的 VM 搬迁到了下面的 sirin 上。此时它只剩下用于日常开发的 VM 了，我便将它重装为 NixOS。由此，它已经不能被称作 All in One 主机了。有趣的是，纵观我的前六代 All in One 主机，可以发现一个趋势：承担不同职能的 VM 被不断地拆分到其他主机上，包括软路由、NAS 等职能，这可能是所谓的「合久必分」吧。
 
 > 感谢 NixOS 的声明式配置，我几乎零成本地完成了服务的迁移。在新安装 NixOS 的 sirin 主机上，我可以一键应用之前写好的系统配置文件，NixOS 会根据这些配置自动完成各种软件包和服务的安装、配置和运行，最终得到和之前几乎完全一样的系统环境。
 
-<BlogImage filePath='hardware/thehub' caption="装机时拍的图，其中的电源购于京东自营，但插电后发现是坏的，我直接退货了" />
+<BlogImage filePath='hardware/thehub' caption="第六代主机，装机时拍的图，其中的电源购于京东自营，但插电后发现是坏的，我直接退货了" />
 
 上图中还有一张蓝色外壳的显卡，那是下面会专门介绍的 AMD Radeon Pro WX 4100，现在它已经被我换到下面的 herta 主机上了。
 
-<BlogImage filePath="hardware/thehub2" caption="这台主机位于我的书桌下，放在一张宜家的边桌上" />
+不过，在最新的第七代中，我又重新装上了 Proxmox VE 系统，因为这台主机其实是我和舍友共同购买的，需要使用虚拟化技术来贡献资源。这台主机上还有一张 RTX 5060 Ti 显卡，我会用它来跑一些 AI 服务，例如我自己设计的基于 LLM 的智能音箱。
 
-这台主机搭载的 i7-12700T 的发热很低，一个 120 水冷就能在全核负载下将它压制在 70 度左右，虽然这时候似乎出现了降频，性能核心的频率仅为 3.7 Ghz。
+<BlogImage filePath='hardware/epyc' caption="第七代主机，装机时拍的图" />
+<BlogImage filePath='hardware/epyc2' caption="第七代主机，装好后拍的图" />
+
+在组装这台主机的过程中，我遇到了不少意外。最开始安装 Proxmox VE 时，安装程序总是在某个环节直接重启。我排查了很久，怀疑是硬盘有问题，更换后顺利安装，但舍友后来测试那块硬盘却说没问题。接下来，我把主板装进机箱开机，发现 BIOS 只识别到七根内存。反复拆装后才发现，机箱上多出来的主板螺柱正好顶住了出问题内存槽背部的引脚。让我感叹现代硬件的鲁棒性，居然没有因此短路烧毁。
+
+之后，我在 Proxmox VE 上跑编译测试时，系统又频繁崩溃重启。查日志发现总是 CPU 32 和 96 报错，且它们属于同一个物理核心。我推测是 CPU 硬件故障，联系商家更换后问题解决。
+
+<BlogImage filePath='hardware/epyc3' />
+
+等我终于开始安装 NixOS 虚拟机时，又遇到虚拟机启动导致系统重启的问题。我排查后发现，WD SN7100 固态硬盘通过 PCIe 直通给虚拟机后，无法正确响应 VFIO 的 reset 命令，系统直接重启。只能改用 QEMU 的软件直通方式。后续在 NixOS 虚拟机配置好 RTX 5060 Ti 显卡直通后，发现虚拟机重启会导致显卡失效。最后我是通过升级 Linux 内核到刚发布的 6.15.0、手动编译最新 NVIDIA 驱动和更新显卡 VBIOS 才解决的。
 
 ## timido
 
 - CPU: AMD Ryzen 9 9800X3D (8 cores, 16 threads)
 - RAM: ADATA XPG LANCER BLADE DDR5-6000 32 GiB x 2
-- GPU: GALAX GeForce RTX 5080 Magic Blade 16 GiB GDDR7
+- GPU: GIGABYTE RTX 5090 WINDFORCE
 - SSD1: SAMSUNG 990 EVO Plus 1 TiB
 - SSD2: SK Hynix Platinum P41 2 TiB
 - Motherboard: GIGABYTE B650I AORUS ULTRA WIFI DDR5
@@ -46,7 +55,7 @@ import { BlogImage } from '../../components/BlogImage'
 
 拥有这个名号的主机主要用于游戏。
 
-<BlogImage filePath="hardware/timido" caption="它现在位于我的电视旁，机箱是 Acat 的 Abox One" />
+<BlogImage filePath="hardware/timido3" caption="它现在位于我的电视旁，机箱是九州风神的 CH270" />
 
 如果从初中毕业算起，我已经换过好几代的游戏主机了：
 
@@ -67,12 +76,6 @@ import { BlogImage } from '../../components/BlogImage'
     大四下学期，刚刚结束在飞书的实习的我，苦于 i5-9600KF 羸弱的性能，最终购买了 i5-13600KF 和新的 mATX 主板以及[乔思伯 D30 机箱](https://www.jonsbo.com/products/D30heise.html)，这也是我第一次使用水冷散热。之后的几个月，我又将显卡升级到了 RTX 4070。淘汰下来的 i5-9600KF 和 RTX 3060Ti 被我卖给了同学。
 
     2024 年底，因为感到乔思伯 D30 机箱看上去非常丑，开始后悔当初为什么要购买这样的侧透机箱，决定从机箱出发重新攒机，先找到足够满意的机箱再决定其它硬件的选型。于是就有了当前的 timido 主机。
-
-<BlogImage filePath="hardware/timido2" caption="影驰的这块 RTX 5080 显卡的外观相当方正，和我的机箱非常搭配" />
-
-最初装上这块 RTX 5080 开机之后，我发现当显示器的 DP 线接上它时，系统无法正常启动。于是我将 DP 线接到主板的 DP 接口上，通过核显成功启动系统，但是装好 RTX 5080 的显卡驱动之后，Windows 设备管理器提示「由于该设备有问题，Windows 已将其停止。（代码 43）」。
-
-我这时察觉到一件事实：机箱提供的 PCIe 延长线最高只能支持 PCIe 4.0，而我的主板和 RTX 5080 均支持 PCIe 5.0。我猜想可能是主板的 BIOS 默认选择了 PCIe 5.0 导致显卡无法正常工作。进入 BIOS 将 PCIe 速度固定为 4.0 后问题解决。
 
 ## vita
 
@@ -139,7 +142,7 @@ import { BlogImage } from '../../components/BlogImage'
 - OS: NixOS 25.05 (Warbler) x86_64
 - Kernel: 6.13.5-xanmod1
 
-这台主机就是前文所说的，在我的 All in One 主机被拆分后，用于跑各种服务的主机。N100 自带的核显的视频编解码性能不错，可以用于 Jellyfin 串流。它运行的其它服务包括 qBittorrent、nginx、[vaultwarden](https://github.com/dani-garcia/vaultwarden) 等。
+这台主机就是前文所说的，在我的 All in One 主机被拆分后，用于跑各种服务的主机。N100 自带的核显的视频编解码性能不错，可以用于 Jellyfin 串流。它运行的其它服务包括 qBittorrent、nginx、[vaultwarden](https://github.com/dani-garcia/vaultwarden) 等。这台主机使用了 [XanMod 内核](https://xanmod.org/)，它在原版内核的基础上添加了一些补丁来提高系统的稳定性、响应速度等（尽管感觉效果不明显）。
 
 <BlogImage filePath="hardware/sirin" caption="它的体积相当小巧，功耗很低，我把它放在电脑桌上的显示器旁边" />
 
@@ -160,8 +163,6 @@ import { BlogImage } from '../../components/BlogImage'
 > Phytium FT-2000/4 是飞腾公司设计的 SoC，基于 ARMv8 架构。[7zip 解压缩性能和隔壁龙芯 3A5000 相当](https://arc.net/l/quote/napdbfwg)。为了让它能够运行主线 Linux，并让 Linux 能够驱动其 SoC 提供的两个 MAC，我花费了一定功夫。详情请见[《给飞腾 FT-2000/4 编译 NixOS》](/articles/compiling-nixos-for-ft2000)。
 
 <BlogImage filePath="hardware/raven2" />
-
-这台主机被我放置在客厅，夹在 datalake 和 yggdrasil 之间。其实它们下面的鞋柜内就是弱电箱，里面就是光猫。这三台设备被我连接到一台 10G 光口交换机上，并通过一个 10G 的光转电模块连接到我的房间的以太网口。
 
 ## ex-raven
 
@@ -221,19 +222,3 @@ import { BlogImage } from '../../components/BlogImage'
 型号为 9001 或 9002 的主板上的硬件和前文的逸珑笔记本相似，同样搭载龙芯 2F 处理器，因此也可以运行主线内核和最新的 NixOS。也许你已经注意到博客左侧或底部的「Powered by」字样了，本博客实际上正是在这台笔记本上运行的。详情请见[《在龙芯 2F 上运行我的博客》](/articles/running-my-blog-on-loongson-2f)。
 
 <BlogImage filePath="hardware/sakimi5" caption="目前，它用来被我作为服务器使用，上面运行着本博客的程序" />
-
-## seele
-
-- CPU: AMD Ryzen 5 5500 (6 cores, 12 threads)
-- RAM: KLEVV BOLT-X DDR4-3200 16 GiB x 2
-- GPU: Inno3D RTX 5060 Ti TWIN X2 16 GiB GDDR7
-- SSD1: HP EX950 1 GiB
-- SSD2: ADATA SP580 240 GiB
-- Motherboard: ASUS PRIME A520M-K
-- OS: NixOS 25.05 (Warbler) x86_64
-- Kernel: Linux 6.14.1-zen1
-
-这是我最近组的用于深度学习的主机，主要用于训练一些音频模型，以及运行一些本地模型应用，例如 ComfyUI。
-
-<BlogImage filePath="hardware/seele1" caption="映众的这张卡的设计朴素且规整" />
-<BlogImage filePath="hardware/seele2" caption="目前，这台主机位于我的电脑桌右边" />
