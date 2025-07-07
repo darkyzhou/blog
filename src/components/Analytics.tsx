@@ -5,8 +5,9 @@ export function Analytics() {
 
   return (
     <script
-      src="https://app.rybbit.io/api/script.js"
-      data-site-id="413"
+      src="https://insights.seele.gg/api/script.js"
+      data-site-id="2"
+      data-web-vitals="true"
       defer
     />
   )
