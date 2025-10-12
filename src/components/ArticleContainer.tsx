@@ -57,7 +57,7 @@ export function ArticleContainer({ children, title, category, date, excerpt, noC
       </div>
       {toc && (
         <div className="hidden xl:block col-span-2 text-carbongray-200">
-          <aside className="sticky top-[25vh] py-8">
+          <aside className="sticky top-0 py-8">
             <ArticleToc toc={toc} />
           </aside>
         </div>
