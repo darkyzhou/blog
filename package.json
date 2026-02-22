@@ -15,9 +15,9 @@
   "dependencies": {
     "@giscus/react": "^3.1.0",
     "clsx": "^2.1.1",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-server-dom-webpack": "19.1.0",
+    "react": "19.1.5",
+    "react-dom": "19.1.5",
+    "react-server-dom-webpack": "19.1.5",
     "rehype-pretty-code": "^0.14.1",
     "shiki": "^3.3.0",
     "waku": "https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1"
