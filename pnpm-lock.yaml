@@ -30,8 +30,8 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       waku:
-        specifier: https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1
-        version: https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(react-dom@19.1.5(react@19.1.5))(react-server-dom-webpack@19.1.5(react-dom@19.1.5(react@19.1.5))(react@19.1.5)(webpack@5.96.1))(react@19.1.5)(sass-embedded@1.87.0)(sass@1.81.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)
+        specifier: https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1
+        version: https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(react-dom@19.1.5(react@19.1.5))(react-server-dom-webpack@19.1.5(react-dom@19.1.5(react@19.1.5))(react@19.1.5)(webpack@5.96.1))(react@19.1.5)(sass-embedded@1.87.0)(sass@1.81.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)
     devDependencies:
       '@altano/remark-mdx-toc-with-slugs':
         specifier: ^3.0.2
@@ -3318,8 +3318,8 @@ packages:
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
 
-  waku@https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1:
-    resolution: {tarball: https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1}
+  waku@https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1:
+    resolution: {integrity: sha512-IRDbOqEYOFngQAfxQZLUEZsDblkDsjP91oOlkD9uxkb8lHPes0quUZ2BR+zPG7xLFyW4iC1cKmWNfUKF1RLveQ==, tarball: https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1}
     version: 0.22.4
     engines: {node: ^22.7.0 || ^20.8.0}
     hasBin: true
@@ -7012,7 +7012,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  waku@https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(react-dom@19.1.5(react@19.1.5))(react-server-dom-webpack@19.1.5(react-dom@19.1.5(react@19.1.5))(react@19.1.5)(webpack@5.96.1))(react@19.1.5)(sass-embedded@1.87.0)(sass@1.81.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1):
+  waku@https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1(@types/node@22.14.1)(jiti@2.4.2)(lightningcss@1.29.2)(react-dom@19.1.5(react@19.1.5))(react-server-dom-webpack@19.1.5(react-dom@19.1.5(react@19.1.5))(react@19.1.5)(webpack@5.96.1))(react@19.1.5)(sass-embedded@1.87.0)(sass@1.81.0)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1):
     dependencies:
       '@hono/node-server': 1.14.1(hono@4.7.7)
       '@swc/core': 1.11.21

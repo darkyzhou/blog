@@ -20,7 +20,7 @@
     "react-server-dom-webpack": "19.1.5",
     "rehype-pretty-code": "^0.14.1",
     "shiki": "^3.3.0",
-    "waku": "https://gitpkg.vercel.app/darkyzhou/waku/packages/waku?v0.22.4-txiki-1"
+    "waku": "https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1"
   },
   "devDependencies": {
     "@altano/remark-mdx-toc-with-slugs": "^3.0.2",
