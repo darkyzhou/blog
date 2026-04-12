@@ -1,8 +1,8 @@
-import type { BlogTocEntry } from '@/types'
 import type { PropsWithChildren } from 'react'
-import { BLOG_CATEGORIES } from '@/data'
+import type { BlogTocEntry } from '@/types'
 import clsx from 'clsx'
 import { Link } from 'waku'
+import { BLOG_CATEGORIES } from '@/data'
 import { ArticleToc } from './ArticleToc'
 import { Comments } from './Comments'
 

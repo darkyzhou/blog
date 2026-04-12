@@ -1,8 +1,8 @@
 'use client'
 
-import { getStats } from '@/actions/stats'
 import { useEffect, useState } from 'react'
 import { Link } from 'waku'
+import { getStats } from '@/actions/stats'
 
 let GET_STATS_PROMISE: Promise<string> | null = null
 

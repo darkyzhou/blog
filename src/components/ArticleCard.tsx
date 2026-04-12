@@ -1,5 +1,5 @@
-import { CarbonArrowUpRight } from '@/icons/CarbonArrowUpRight'
 import { Link } from 'waku'
+import { CarbonArrowUpRight } from '@/icons/CarbonArrowUpRight'
 
 let _dateFormat: Intl.DateTimeFormat | undefined
 function getDateFormat() {

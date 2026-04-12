@@ -1,8 +1,8 @@
+import { Link } from 'waku'
 import { ArticleList } from '@/components/ArticleList'
 import { PageContainer } from '@/components/PageContainer'
 import { BLOG_ARTICLES, BLOG_CATEGORIES } from '@/data'
 import { CarbonArrowUpRight } from '@/icons/CarbonArrowUpRight'
-import { Link } from 'waku'
 
 export default async function Index() {
   return (

@@ -1,5 +1,7 @@
 import type { BlogArticleModule } from './types'
 
+const EXT_RE = /\.[^.]+$/
+
 function basename(path: string) {
   const parts = path.split('/')
   if (!parts.length) {
@@ -11,7 +13,7 @@ function basename(path: string) {
     return path
   }
 
-  return last.replace(/\.[^.]+$/, '')
+  return last.replace(EXT_RE, '')
 }
 
 export const BLOG_ARTICLES = new Map(

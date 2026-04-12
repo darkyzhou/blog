@@ -4,29 +4,29 @@
 import type { PathsForPages, GetConfigResponse } from 'waku/router';
 
 // prettier-ignore
-import type { getConfig as AboutIndex_getConfig } from './pages/about/index';
+import type { getConfig as File_AboutIndex_getConfig } from './pages/about/index';
 // prettier-ignore
-import type { getConfig as ArticlesSlug_getConfig } from './pages/articles/[slug]';
+import type { getConfig as File_ArticlesSlug_getConfig } from './pages/articles/[slug]';
 // prettier-ignore
-import type { getConfig as CategoriesSlug_getConfig } from './pages/categories/[slug]';
+import type { getConfig as File_CategoriesSlug_getConfig } from './pages/categories/[slug]';
 // prettier-ignore
-import type { getConfig as CategoriesIndex_getConfig } from './pages/categories/index';
+import type { getConfig as File_CategoriesIndex_getConfig } from './pages/categories/index';
 // prettier-ignore
-import type { getConfig as HardwareIndex_getConfig } from './pages/hardware/index';
+import type { getConfig as File_HardwareIndex_getConfig } from './pages/hardware/index';
 // prettier-ignore
-import type { getConfig as Index_getConfig } from './pages/index';
+import type { getConfig as File_Index_getConfig } from './pages/index';
 // prettier-ignore
-import type { getConfig as StackIndex_getConfig } from './pages/stack/index';
+import type { getConfig as File_StackIndex_getConfig } from './pages/stack/index';
 
 // prettier-ignore
 type Page =
-| ({ path: '/about' } & GetConfigResponse<typeof AboutIndex_getConfig>)
-| ({ path: '/articles/[slug]' } & GetConfigResponse<typeof ArticlesSlug_getConfig>)
-| ({ path: '/categories/[slug]' } & GetConfigResponse<typeof CategoriesSlug_getConfig>)
-| ({ path: '/categories' } & GetConfigResponse<typeof CategoriesIndex_getConfig>)
-| ({ path: '/hardware' } & GetConfigResponse<typeof HardwareIndex_getConfig>)
-| ({ path: '/' } & GetConfigResponse<typeof Index_getConfig>)
-| ({ path: '/stack' } & GetConfigResponse<typeof StackIndex_getConfig>);
+| ({ path: '/about' } & GetConfigResponse<typeof File_AboutIndex_getConfig>)
+| ({ path: '/articles/[slug]' } & GetConfigResponse<typeof File_ArticlesSlug_getConfig>)
+| ({ path: '/categories/[slug]' } & GetConfigResponse<typeof File_CategoriesSlug_getConfig>)
+| ({ path: '/categories' } & GetConfigResponse<typeof File_CategoriesIndex_getConfig>)
+| ({ path: '/hardware' } & GetConfigResponse<typeof File_HardwareIndex_getConfig>)
+| ({ path: '/' } & GetConfigResponse<typeof File_Index_getConfig>)
+| ({ path: '/stack' } & GetConfigResponse<typeof File_StackIndex_getConfig>);
 
 // prettier-ignore
 declare module 'waku/router' {
@@ -37,4 +37,3 @@ declare module 'waku/router' {
     pages: Page;
   }
 }
-  
