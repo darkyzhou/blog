@@ -9,8 +9,8 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypePrettyCode from 'rehype-pretty-code'
 import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import { defineConfig } from 'waku/config'
 
 const REHYPE_PRETTY_CODE_OPTIONS: RehypePrettyCodeOptions = {
   theme: 'kanagawa-dragon',
@@ -31,41 +31,32 @@ function getBuildCommit() {
   return 'unknown'
 }
 
-export default {
-  define: {
-    BLOG_BUILD_DATE: JSON.stringify(new Date().toISOString()),
-    BLOG_BUILD_COMMIT: JSON.stringify(getBuildCommit()),
-  },
-  css: {
-    preprocessorOptions: {
-      scss: { api: 'modern' },
+export default defineConfig({
+  unstable_adapter: 'waku/adapters/txiki',
+  vite: {
+    define: {
+      BLOG_BUILD_DATE: JSON.stringify(new Date().toISOString()),
+      BLOG_BUILD_COMMIT: JSON.stringify(getBuildCommit()),
     },
+    css: {
+      preprocessorOptions: {
+        scss: { api: 'modern' },
+      },
+    },
+    plugins: [
+      tailwindcss(),
+      tsconfigPaths(),
+      mdx({
+        rehypePlugins: [
+          [rehypePrettyCode, REHYPE_PRETTY_CODE_OPTIONS],
+          rehypeSlug,
+          [rehypeAutolinkHeadings, REHYPE_AUTOLINK_HEADINGS_OPTIONS],
+        ],
+        remarkPlugins: [
+          remarkGfm,
+          remarkTocWithSlugs,
+        ],
+      }),
+    ],
   },
-  plugins: [
-    tailwindcss(),
-    tsconfigPaths(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/@ibm/plex-sans-sc/fonts/*',
-          dest: 'assets/fonts',
-        },
-        {
-          src: 'node_modules/@ibm/plex-mono/fonts/*',
-          dest: 'assets/fonts',
-        },
-      ],
-    }),
-    mdx({
-      rehypePlugins: [
-        [rehypePrettyCode, REHYPE_PRETTY_CODE_OPTIONS],
-        rehypeSlug,
-        [rehypeAutolinkHeadings, REHYPE_AUTOLINK_HEADINGS_OPTIONS],
-      ],
-      remarkPlugins: [
-        remarkGfm,
-        remarkTocWithSlugs,
-      ],
-    }),
-  ],
-}
+})

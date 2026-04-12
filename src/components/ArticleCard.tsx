@@ -1,11 +1,14 @@
 import { CarbonArrowUpRight } from '@/icons/CarbonArrowUpRight'
 import { Link } from 'waku'
 
-const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-})
+let _dateFormat: Intl.DateTimeFormat | undefined
+function getDateFormat() {
+  return (_dateFormat ??= new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }))
+}
 
 interface ArticleCardProps {
   slug: string
@@ -32,7 +35,7 @@ export function ArticleCard({ slug, category, title, date, excerpt }: ArticleCar
           {' '}
           ·
           {' '}
-          {DATE_FORMAT.format(new Date(date))}
+          {getDateFormat().format(new Date(date))}
         </span>
         <h1 className="text-carbongray-50 text-xl">
           {title}

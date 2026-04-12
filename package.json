@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "preinstall": "cd waku && pnpm install && pnpm --filter waku run compile",
+    "postinstall": "mkdir -p public/assets/fonts && cp -r node_modules/@ibm/plex-sans-sc/fonts/* public/assets/fonts/ && cp -r node_modules/@ibm/plex-mono/fonts/* public/assets/fonts/",
     "dev": "waku dev",
-    "build": "waku build --with-txiki",
-    "start": "waku start",
+    "build": "waku build",
+    "start": "tjs run --import-map dist/import-map.json dist/serve-txiki.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "images": "tsx scripts/process-images.ts",
@@ -15,12 +17,13 @@
   "dependencies": {
     "@giscus/react": "^3.1.0",
     "clsx": "^2.1.1",
-    "react": "19.1.5",
-    "react-dom": "19.1.5",
-    "react-server-dom-webpack": "19.1.5",
+    "hono": "^4.12.12",
+    "react": "~19.2.5",
+    "react-dom": "~19.2.5",
+    "react-server-dom-webpack": "~19.2.5",
     "rehype-pretty-code": "^0.14.1",
     "shiki": "^3.3.0",
-    "waku": "https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v0.22.4-txiki-1"
+    "waku": "file:./waku/packages/waku"
   },
   "devDependencies": {
     "@altano/remark-mdx-toc-with-slugs": "^3.0.2",
@@ -31,10 +34,10 @@
     "@tailwindcss/postcss": "^4.1.4",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.4",
-    "@txikijs/types": "^24.12.0",
+    "@txikijs/types": "^26.4.0",
     "@types/mdx": "^2.0.13",
-    "@types/react": "19.1.2",
-    "@types/react-dom": "19.1.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "eslint": "^9.25.1",
     "hast-util-from-html-isomorphic": "^2.0.0",
     "husky": "^9.1.7",
@@ -45,8 +48,7 @@
     "sharp": "^0.34.1",
     "tailwindcss": "^4.1.4",
     "tsx": "^4.19.3",
-    "typescript": "5.8.3",
-    "vite-plugin-static-copy": "^2.3.1",
+    "typescript": "^6.0.2",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

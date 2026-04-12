@@ -6,13 +6,16 @@ import { Link } from 'waku'
 import { ArticleToc } from './ArticleToc'
 import { Comments } from './Comments'
 
-const DATE_FORMAT = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: 'numeric',
-  year: 'numeric',
-  month: 'numeric',
-  day: 'numeric',
-})
+let _dateFormat: Intl.DateTimeFormat | undefined
+function getDateFormat() {
+  return (_dateFormat ??= new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: 'numeric',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  }))
+}
 
 export type ArticleContainerProps = PropsWithChildren<{
   title: string
@@ -45,7 +48,7 @@ export function ArticleContainer({ children, title, category, date, excerpt, noC
             {' '}
             ·
             {' '}
-            {DATE_FORMAT.format(new Date(date))}
+            {getDateFormat().format(new Date(date))}
           </header>
         )}
         <section className={clsx('pb-8 md:pb-16 prose prose-invert max-w-full', (!category || !date) && 'pt-8 md:pt-16')}>

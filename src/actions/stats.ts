@@ -7,12 +7,8 @@ export async function getStats() {
     return 'Not running in Txiki.js'
   }
 
-  const theCpu = globalThis.tjs.system.cpus[0]
-  if (!theCpu) {
-    return 'No CPU info'
-  }
-
-  const { arch, platform, osRelease } = globalThis.tjs.system
+  const { architecture, platformVersion } = await navigator.userAgentData.getHighEntropyValues(['architecture', 'platformVersion'])
+  const platform = navigator.userAgentData?.platform ?? 'unknown'
   const version = globalThis.tjs.version
-  return `Powered by NixOS (${platform} ${osRelease}, ${arch}), Loongson-2F @ 1.2 GHz, Txiki.js v${version}`
+  return `Powered by NixOS (${platform} ${platformVersion}, ${architecture}), Loongson-2F @ 1.2 GHz, Txiki.js v${version}`
 }
