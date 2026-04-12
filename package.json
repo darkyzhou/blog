@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "preinstall": "cd waku && pnpm install && pnpm --filter waku run compile",
     "postinstall": "mkdir -p public/assets/fonts && cp -r node_modules/@ibm/plex-sans-sc/fonts/* public/assets/fonts/ && cp -r node_modules/@ibm/plex-mono/fonts/* public/assets/fonts/",
     "dev": "waku dev",
     "build": "waku build",
@@ -23,7 +22,7 @@
     "react-server-dom-webpack": "~19.2.5",
     "rehype-pretty-code": "^0.14.3",
     "shiki": "^4.0.2",
-    "waku": "file:./waku/packages/waku"
+    "waku": "https://simple-gitpkg-subdir.vercel.app/darkyzhou/waku/packages/waku?ref=v1.0.0-alpha.7-txiki-1"
   },
   "devDependencies": {
     "@altano/remark-mdx-toc-with-slugs": "^4.0.2",

@@ -1,3 +1,0 @@
-[submodule "waku"]
-	path = waku
-	url = git@github.com:darkyzhou/waku.git
